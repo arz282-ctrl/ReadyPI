@@ -38,7 +38,20 @@ router.post('/playground', verifyJWT, async (req, res) => {
       'google/gemini-1.5-flash': 'readypi/gemini-flash',
       'google/gemini-1.5-pro': 'readypi/gemini-pro',
       'anthropic/claude-3.5-sonnet': 'readypi/claude-sonnet',
-      'mixtral-8x7b': 'readypi/mistral'
+      'mixtral-8x7b': 'readypi/mistral',
+      'zai-org/glm-5.1': 'readypi/glm-5.1',
+      // AWS Bedrock models
+      'bedrock/nova-micro': 'readypi/bedrock-nova-micro',
+      'bedrock/nova-lite': 'readypi/bedrock-nova-lite',
+      'bedrock/nova-pro': 'readypi/bedrock-nova-pro',
+      'bedrock/titan': 'readypi/bedrock-titan',
+      'bedrock/llama-8b': 'readypi/bedrock-llama-8b',
+      'bedrock/llama-70b': 'readypi/bedrock-llama-70b',
+      'bedrock/mistral-7b': 'readypi/bedrock-mistral-7b',
+      'bedrock/mixtral': 'readypi/bedrock-mixtral',
+      'bedrock/claude-haiku-3': 'readypi/bedrock-claude-haiku-3',
+      'bedrock/claude-haiku': 'readypi/bedrock-claude-haiku',
+      'bedrock/claude-sonnet': 'readypi/bedrock-claude-sonnet',
     };
 
     const backendModel = modelMap[model] || model;
@@ -56,8 +69,10 @@ router.post('/playground', verifyJWT, async (req, res) => {
     const modelPricing = pricingResult.rows[0];
 
     // 4. Estimate & Check credits
+    // Pricing: minimum 5 BDT per request + 1 credit per 100 tokens
+    // This ensures 50 free BDT lasts ~5-10 requests
     const promptTokens = tokenizer.countTokens(messages);
-    const estimatedCredits = Math.ceil((promptTokens + (max_tokens || 1000)) / 1000);
+    const estimatedCredits = Math.max(5, Math.ceil((promptTokens + (max_tokens || 1000)) / 100));
 
     if (currentBalance < estimatedCredits) {
       return res.status(402).json({ error: 'Insufficient credits' });
@@ -74,10 +89,11 @@ router.post('/playground', verifyJWT, async (req, res) => {
     });
 
     // 6. Calculate actual usage
+    // Pricing: min 5 BDT + 1 credit per 100 tokens (50 BDT ≈ 5-10 requests)
     const completionTokens = aiResponse.usage?.completion_tokens || tokenizer.countTokens([{ role: 'assistant', content: aiResponse.content }]);
     const totalTokens = promptTokens + completionTokens;
-    const creditsUsed = Math.ceil(totalTokens / 1000);
-    const costBdt = (totalTokens / 1000000) * parseFloat(modelPricing.cost_per_1m_tokens_bdt);
+    const creditsUsed = Math.max(5, Math.ceil(totalTokens / 100));
+    const costBdt = creditsUsed; // 1 credit = 1 BDT
 
     // 7. Record usage & Deduct credits
     await db.transaction(async (client) => {
@@ -186,9 +202,9 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
     // Estimate prompt tokens
     const promptTokens = tokenizer.countTokens(messages);
 
-    // Estimate credits needed (rough estimate, will be adjusted after response)
+    // Estimate credits needed (min 5 BDT + 1 per 100 tokens)
     const estimatedTotalTokens = promptTokens + (max_tokens || 1000);
-    const estimatedCredits = Math.ceil(estimatedTotalTokens / 1000);
+    const estimatedCredits = Math.max(5, Math.ceil(estimatedTotalTokens / 100));
 
     // Check credit balance
     if (req.apiKey.creditBalance < estimatedCredits) {
@@ -223,11 +239,11 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
       ...otherParams
     });
 
-    // Calculate actual tokens used
+    // Calculate actual tokens used (min 5 BDT + 1 per 100 tokens)
     const completionTokens = aiResponse.usage?.completion_tokens || tokenizer.countTokens([{ role: 'assistant', content: aiResponse.content }]);
     const totalTokens = promptTokens + completionTokens;
-    const creditsUsed = Math.ceil(totalTokens / 1000);
-    const costBdt = (totalTokens / 1000000) * parseFloat(modelPricing.cost_per_1m_tokens_bdt);
+    const creditsUsed = Math.max(5, Math.ceil(totalTokens / 100));
+    const costBdt = creditsUsed; // 1 credit = 1 BDT
 
     // Deduct credits in transaction
     await db.transaction(async (client) => {

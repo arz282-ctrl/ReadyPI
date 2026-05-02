@@ -95,6 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (typeof window !== 'undefined') {
         localStorage.setItem('readypi_token', data.token);
         localStorage.setItem('readypi_user', JSON.stringify(data.user));
+        // Set cookie for middleware route protection
+        document.cookie = `readypi_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       }
 
       // Fetch full profile (includes credits, API key count, etc.)
@@ -124,6 +126,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       localStorage.setItem('readypi_token', data.token);
       localStorage.setItem('readypi_user', JSON.stringify(data.user));
+      // Set cookie for middleware route protection
+      document.cookie = `readypi_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
     }
 
     const { data: profile } = await authAPI.me();
@@ -173,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('readypi_token', data.token);
           localStorage.setItem('readypi_user', JSON.stringify(data.user));
+          document.cookie = `readypi_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
         }
         const { data: profile } = await authAPI.me();
         patch({ user: profile, token: data.token, loading: false, error: null });
@@ -269,6 +274,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('readypi_token');
         localStorage.removeItem('readypi_user');
+        // Clear session cookie
+        document.cookie = 'readypi_session=; path=/; max-age=0';
       }
       patch({ firebaseUser: null, user: null, token: null, loading: false, error: null });
     }
@@ -298,13 +305,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const parsedUser = JSON.parse(savedUser);
           patch({ token: savedToken, user: parsedUser as UserProfile, loading: false });
 
+          // Ensure the cookie is synced (it may have expired while localStorage persisted)
+          // This prevents the middleware from redirecting when auth context thinks user is logged in
+          document.cookie = `readypi_session=${savedToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+
           // Refresh profile in background for freshness
           authAPI.me()
             .then(({ data }) => patch({ user: data }))
             .catch(() => {
-              // Token expired — clear session
+              // Token expired — clear everything including cookie
               localStorage.removeItem('readypi_token');
               localStorage.removeItem('readypi_user');
+              document.cookie = 'readypi_session=; path=/; max-age=0';
               patch({ user: null, token: null });
             });
           return;

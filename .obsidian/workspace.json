@@ -1,0 +1,41 @@
+{
+  "main": {
+    "id": "readypi-main",
+    "type": "split",
+    "children": [
+      {
+        "id": "readypi-leaf",
+        "type": "leaf",
+        "state": {
+          "type": "empty",
+          "state": {}
+        }
+      }
+    ]
+  },
+  "left": {
+    "id": "left-sidebar",
+    "type": "split",
+    "children": [
+      {
+        "id": "file-explorer",
+        "type": "leaf",
+        "state": {
+          "type": "file-explorer",
+          "state": {}
+        }
+      }
+    ],
+    "collapsed": false
+  },
+  "right": {
+    "id": "right-sidebar",
+    "type": "split",
+    "children": [],
+    "collapsed": true
+  },
+  "active": "readypi-leaf",
+  "lastOpenFiles": [
+    "README.md"
+  ]
+}

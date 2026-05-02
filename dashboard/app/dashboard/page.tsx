@@ -1,11 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { keysAPI, creditsAPI } from '@/lib/api'
-import { Activity, Key, BarChart3, Plus, Trash2, Copy, Check, TerminalSquare, ChevronLeft, Loader2, LogOut } from 'lucide-react'
+import {
+  Key, Plus, Trash2, Copy, Check, TerminalSquare, ChevronLeft,
+  Loader2, LogOut, Rocket, ArrowRight, RefreshCw, Shield,
+} from 'lucide-react'
+
+// Dashboard components
+import StatsCards from '@/components/dashboard/stats-cards'
+import UsageChart from '@/components/dashboard/usage-chart'
+import ModelDistribution from '@/components/dashboard/model-distribution'
+import LogsTable from '@/components/dashboard/logs-table'
+
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 interface APIKey {
   id: string
@@ -15,23 +26,141 @@ interface APIKey {
   is_active: boolean
 }
 
+// ─── Empty State CTA ────────────────────────────────────────────────────────
+
+function EmptyState() {
+  return (
+    <div className="bg-[#111118] border border-[#1f1f23] rounded-2xl p-12 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-[#ff6b4a]/10 flex items-center justify-center mx-auto mb-6">
+        <Rocket size={28} className="text-[#ff6b4a]" />
+      </div>
+      <h3 className="text-white text-xl font-bold mb-2">Start Integrating</h3>
+      <p className="text-[#6b6b76] text-sm max-w-md mx-auto mb-6 leading-relaxed">
+        Generate your first API key and make a request to see analytics, logs, and usage data here.
+      </p>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <Link
+          href="/docs"
+          className="inline-flex items-center gap-2 bg-[#ff6b4a] text-white px-6 py-3 rounded-xl text-sm font-bold hover:shadow-[0_0_25px_rgba(255,107,74,0.3)] transition-all"
+        >
+          Read the Quickstart <ArrowRight size={16} />
+        </Link>
+        <Link
+          href="/playground"
+          className="inline-flex items-center gap-2 border border-[#1f1f23] text-white px-6 py-3 rounded-xl text-sm font-medium hover:border-[#ff6b4a]/30 transition-all"
+        >
+          <TerminalSquare size={16} /> Try the Playground
+        </Link>
+      </div>
+      {/* Code example */}
+      <div className="mt-8 max-w-lg mx-auto">
+        <pre className="bg-[#0a0a0f] border border-[#1f1f23] rounded-xl p-4 text-left text-xs font-mono text-[#9b9ba8] overflow-x-auto">
+          <code>{`curl https://api.readypi.io/v1/chat/completions \\
+  -H "Authorization: Bearer rpi_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"model": "readypi/gemini-flash",
+       "messages": [{"role":"user","content":"Hello!"}]}'`}</code>
+        </pre>
+      </div>
+    </div>
+  )
+}
+
+// ─── Key Modal ──────────────────────────────────────────────────────────────
+
+function KeyModal({
+  show, onClose, onSubmit, creating, newKey, newKeyName, setNewKeyName, onCopy, copied,
+}: {
+  show: boolean; onClose: () => void; onSubmit: (e: React.FormEvent) => void;
+  creating: boolean; newKey: string | null; newKeyName: string;
+  setNewKeyName: (v: string) => void; onCopy: () => void; copied: boolean;
+}) {
+  if (!show) return null
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-[#111118] border border-[#1f1f23] rounded-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="p-6 border-b border-[#1f1f23]">
+          <h3 className="text-white font-bold text-lg">Generate API Key</h3>
+          <p className="text-[11px] text-[#6b6b76] mt-1">Create a new key for API access</p>
+        </div>
+
+        {newKey ? (
+          <div className="p-6 space-y-4">
+            <div className="bg-[#ff6b4a]/10 border border-[#ff6b4a]/20 text-[#ff6b4a] p-4 rounded-xl text-sm flex items-start gap-2">
+              <Shield size={16} className="mt-0.5 flex-shrink-0" />
+              <span>Store this key securely. It will not be shown again.</span>
+            </div>
+            <div className="flex items-center gap-2 bg-[#0a0a0f] border border-[#1f1f23] p-3 rounded-xl">
+              <code className="text-white flex-1 overflow-x-auto whitespace-nowrap text-xs font-mono">{newKey}</code>
+              <button onClick={onCopy} className="p-2 text-[#6b6b76] hover:text-white bg-[#1f1f23] rounded-lg transition-colors flex-shrink-0">
+                {copied ? <Check size={14} className="text-[#00ff88]" /> : <Copy size={14} />}
+              </button>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-full bg-[#1f1f23] text-white py-3 rounded-xl text-sm font-medium hover:bg-[#2a2a35] transition-colors"
+            >
+              I&apos;ve saved the key
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={onSubmit} className="p-6 space-y-5">
+            <div>
+              <label className="text-[11px] uppercase tracking-wider text-[#6b6b76] block mb-2 font-medium">Key Name</label>
+              <input
+                type="text"
+                value={newKeyName}
+                onChange={e => setNewKeyName(e.target.value)}
+                placeholder="e.g. Production Backend"
+                className="w-full bg-[#0a0a0f] border border-[#1f1f23] text-white py-3 px-4 rounded-xl outline-none focus:border-[#ff6b4a] text-sm font-mono transition-colors placeholder:text-[#4a4a56]"
+                required
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-3">
+              <button type="button" onClick={onClose} className="flex-1 border border-[#1f1f23] text-[#9b9ba8] py-3 rounded-xl text-sm font-medium hover:text-white transition-colors">
+                Cancel
+              </button>
+              <button type="submit" disabled={creating || !newKeyName.trim()} className="flex-1 bg-[#ff6b4a] text-white py-3 rounded-xl text-sm font-bold hover:bg-[#e55a3a] disabled:opacity-50 flex justify-center items-center gap-2 transition-colors">
+                {creating ? <Loader2 size={14} className="animate-spin" /> : 'Generate'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+
 export default function UserDashboard() {
   const router = useRouter()
-  const { user, loading: authLoading, logout } = useAuth()
-  
-  const [tab, setTab] = useState<'keys' | 'usage' | 'logs'>('keys')
-  const [copied, setCopied] = useState<string | null>(null)
+  const { user, loading: authLoading, logout, refreshProfile } = useAuth()
+
+  // Tab state
+  const [tab, setTab] = useState<'overview' | 'keys' | 'logs'>('overview')
+
+  // Key management
   const [keys, setKeys] = useState<APIKey[]>([])
   const [loadingKeys, setLoadingKeys] = useState(true)
   const [creatingKey, setCreatingKey] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
   const [showKeyModal, setShowKeyModal] = useState(false)
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null)
-  
+  const [copied, setCopied] = useState<string | null>(null)
+
+  // Analytics
   const [stats, setStats] = useState<any>(null)
   const [usage, setUsage] = useState<any[]>([])
   const [loadingStats, setLoadingStats] = useState(true)
   const [loadingUsage, setLoadingUsage] = useState(true)
+  const [usageTotal, setUsageTotal] = useState(0)
+  const [usageOffset, setUsageOffset] = useState(0)
+  const usageLimit = 25
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -40,14 +169,14 @@ export default function UserDashboard() {
     }
   }, [user, authLoading, router])
 
-  // Fetch initial data
+  // Fetch data on mount
   useEffect(() => {
     if (user) {
       fetchKeys()
       fetchStats()
-      fetchUsage()
+      fetchUsage(0)
     }
-  }, [user])
+  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchStats = async () => {
     try {
@@ -61,11 +190,13 @@ export default function UserDashboard() {
     }
   }
 
-  const fetchUsage = async () => {
+  const fetchUsage = async (offset: number) => {
     try {
       setLoadingUsage(true)
-      const { data } = await creditsAPI.usage()
+      const { data } = await creditsAPI.usage({ limit: usageLimit, offset })
       setUsage(data.usage || [])
+      setUsageTotal(data.pagination?.total || 0)
+      setUsageOffset(offset)
     } catch (err) {
       console.error('Failed to fetch usage', err)
     } finally {
@@ -88,13 +219,13 @@ export default function UserDashboard() {
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newKeyName.trim()) return
-
     try {
       setCreatingKey(true)
       const { data } = await keysAPI.create(newKeyName.trim())
-      setNewlyCreatedKey(data.api_key) // Show full key once
+      setNewlyCreatedKey(data.key)
       setNewKeyName('')
       await fetchKeys()
+      refreshProfile()
     } catch (err) {
       console.error('Failed to create key', err)
     } finally {
@@ -103,11 +234,11 @@ export default function UserDashboard() {
   }
 
   const handleRevokeKey = async (id: string) => {
-    if (!confirm('Are you sure you want to revoke this key? Any applications using it will instantly fail.')) return
-    
+    if (!confirm('Revoke this key? Applications using it will immediately fail.')) return
     try {
       await keysAPI.revoke(id)
       await fetchKeys()
+      refreshProfile()
     } catch (err) {
       console.error('Failed to revoke key', err)
     }
@@ -119,313 +250,219 @@ export default function UserDashboard() {
     setTimeout(() => setCopied(null), 2000)
   }
 
+  // ─── Loading state ─────────────────────────────────────────────────────
+
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#FF4500]" size={48} />
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#ff6b4a]" size={36} />
       </div>
     )
   }
 
+  // ─── Derived data ──────────────────────────────────────────────────────
+
+  const hasData = stats?.last_30_days?.total_requests > 0
+  const totalRequests = stats?.last_30_days?.total_requests || 0
+  const totalTokens = stats?.last_30_days?.total_tokens || 0
+  const avgLatency = stats?.last_30_days?.avg_latency_ms || 0
+  const totalCostBdt = stats?.last_30_days?.total_cost_bdt || 0
+  const modelBreakdown = stats?.model_breakdown || []
+  const dailyUsage = stats?.daily_usage || []
+
+  const tabs = [
+    { id: 'overview' as const, label: 'Overview', icon: <TerminalSquare size={14} /> },
+    { id: 'keys' as const, label: 'API Keys', icon: <Key size={14} /> },
+    { id: 'logs' as const, label: 'Logs', icon: <RefreshCw size={14} /> },
+  ]
+
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#e6e0e9] font-mono">
-      <nav className="h-16 bg-[#0d1117] border-b border-[#262626] flex items-center justify-between px-6 sticky top-0 z-50">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 text-[#948e9c] hover:text-[#FF4500] transition-colors">
-            <ChevronLeft size={16} /> Back
-          </Link>
-          <div className="h-4 w-[1px] bg-[#262626]"></div>
-          <div className="flex items-center gap-2 text-white font-semibold uppercase tracking-widest font-technical">
-            <TerminalSquare size={18} className="text-[#FF4500]" /> Console Dashboard
+    <div className="min-h-screen bg-[#0a0a0f] text-gray-300">
+      {/* ── Navbar ── */}
+      <nav className="sticky top-0 z-50 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-[#1f1f23]">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-1.5 text-[#6b6b76] hover:text-[#ff6b4a] text-xs transition-colors">
+              <ChevronLeft size={14} /> Home
+            </Link>
+            <div className="h-4 w-px bg-[#1f1f23]" />
+            <div className="flex items-center gap-2 text-white text-sm font-semibold">
+              <TerminalSquare size={16} className="text-[#ff6b4a]" />
+              Dashboard
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-sm font-technical text-[#948e9c]">
-            {user.email}
+
+          <div className="flex items-center gap-3">
+            {/* Credits pill */}
+            <Link href="/billing" className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#111118] border border-[#1f1f23] rounded-lg hover:border-[#ff6b4a]/30 transition-colors">
+              <span className="text-[10px] uppercase tracking-wider text-[#6b6b76]">Credits</span>
+              <span className="text-sm font-bold font-mono text-[#00ff88]">{user.credits?.balance?.toLocaleString() || 0}</span>
+            </Link>
+
+            <div className="text-xs text-[#6b6b76] hidden sm:block">{user.email?.split('@')[0]}</div>
+
+            <button onClick={() => logout()} className="p-2 text-[#6b6b76] hover:text-[#ff6b4a] hover:bg-[#ff6b4a]/10 rounded-lg transition-colors" title="Log Out">
+              <LogOut size={16} />
+            </button>
           </div>
-          <button 
-            onClick={() => logout()} 
-            className="p-2 text-[#948e9c] hover:text-[#FF4500] hover:bg-[#FF4500]/10 rounded transition-colors"
-            title="Log Out"
-          >
-            <LogOut size={18} />
-          </button>
         </div>
       </nav>
 
-      <main className="max-w-[1200px] mx-auto px-6 py-12">
-        {/* Header Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-[#0d1117] border border-[#262626] rounded-xl p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF4500] opacity-[0.03] rounded-full -translate-y-1/2 translate-x-1/4 blur-2xl"></div>
-            <div className="text-[#948e9c] font-technical text-technical-label uppercase tracking-widest mb-2 flex items-center justify-between">
-              Token Balance
-              <Link href="/billing" className="text-[#FF4500] hover:underline normal-case tracking-normal text-xs">Top Up</Link>
-            </div>
-            <div className="text-4xl font-serif font-bold text-white">
-              {user.credits?.balance?.toLocaleString() || 0}
-            </div>
-            <div className="text-xs text-[#948e9c] mt-2 font-technical">AVAILABLE CREDITS</div>
-          </div>
-
-          <div className="bg-[#0d1117] border border-[#262626] rounded-xl p-6">
-            <div className="text-[#948e9c] font-technical text-technical-label uppercase tracking-widest mb-2">
-              Plan Tier
-            </div>
-            <div className="text-4xl font-serif font-bold text-white capitalize">
-              {user.plan_tier || 'Free'}
-            </div>
-            <div className="text-xs text-[#948e9c] mt-2 font-technical">CURRENT SUBSCRIPTION</div>
-          </div>
-
-          <div className="bg-[#0d1117] border border-[#262626] rounded-xl p-6">
-            <div className="text-[#948e9c] font-technical text-technical-label uppercase tracking-widest mb-2">
-              Active Keys
-            </div>
-            <div className="text-4xl font-serif font-bold text-white">
-              {user.api_key_count || 0}
-            </div>
-            <div className="text-xs text-[#948e9c] mt-2 font-technical">SECURITY CREDENTIALS</div>
+      {/* ── Tabs ── */}
+      <div className="border-b border-[#1f1f23] bg-[#0a0a0f]">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+          <div className="flex gap-1 -mb-px overflow-x-auto no-scrollbar">
+            {tabs.map(t => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  tab === t.id
+                    ? 'border-[#ff6b4a] text-[#ff6b4a]'
+                    : 'border-transparent text-[#6b6b76] hover:text-white'
+                }`}
+              >
+                {t.icon} {t.label}
+              </button>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-[#262626] mb-8">
-          <button onClick={() => setTab('keys')} className={`px-6 py-3 font-technical text-technical-label uppercase tracking-wider flex items-center gap-2 border-b-2 transition-colors ${tab === 'keys' ? 'border-[#FF4500] text-[#FF4500]' : 'border-transparent text-[#948e9c] hover:text-white'}`}><Key size={16} /> Access Keys</button>
-          <button onClick={() => setTab('usage')} className={`px-6 py-3 font-technical text-technical-label uppercase tracking-wider flex items-center gap-2 border-b-2 transition-colors ${tab === 'usage' ? 'border-[#FF4500] text-[#FF4500]' : 'border-transparent text-[#948e9c] hover:text-white'}`}><BarChart3 size={16} /> Analytics</button>
-          <button onClick={() => setTab('logs')} className={`px-6 py-3 font-technical text-technical-label uppercase tracking-wider flex items-center gap-2 border-b-2 transition-colors ${tab === 'logs' ? 'border-[#FF4500] text-[#FF4500]' : 'border-transparent text-[#948e9c] hover:text-white'}`}><Activity size={16} /> Audit Logs</button>
-        </div>
+      {/* ── Content ── */}
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-        {/* Tab Content: Keys */}
+        {/* ═══ OVERVIEW TAB ═══ */}
+        {tab === 'overview' && (
+          <div className="space-y-6">
+            {!hasData && !loadingStats ? (
+              <EmptyState />
+            ) : (
+              <>
+                <StatsCards
+                  totalRequests={totalRequests}
+                  totalTokens={totalTokens}
+                  avgLatency={avgLatency}
+                  totalCostBdt={totalCostBdt}
+                  dailyUsage={dailyUsage}
+                />
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <UsageChart dailyUsage={dailyUsage} loading={loadingStats} />
+                  </div>
+                  <div>
+                    <ModelDistribution data={modelBreakdown} totalRequests={totalRequests} loading={loadingStats} />
+                  </div>
+                </div>
+
+                <LogsTable
+                  logs={usage}
+                  loading={loadingUsage}
+                  total={usageTotal}
+                  limit={usageLimit}
+                  offset={usageOffset}
+                  onPageChange={(newOffset) => fetchUsage(newOffset)}
+                />
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ═══ API KEYS TAB ═══ */}
         {tab === 'keys' && (
-          <div className="animate-fade-in">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-serif font-bold text-white uppercase tracking-wider">Gateway Credentials</h2>
-              <button 
-                onClick={() => setShowKeyModal(true)}
-                className="bg-[#FF4500] text-white px-4 py-2 rounded font-technical text-technical-label uppercase tracking-widest flex items-center gap-2 hover:bg-[#D93B00] transition-colors"
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-white text-lg font-bold">API Keys</h2>
+                <p className="text-[#6b6b76] text-xs mt-0.5">Manage your gateway credentials</p>
+              </div>
+              <button
+                onClick={() => { setNewlyCreatedKey(null); setShowKeyModal(true) }}
+                className="inline-flex items-center gap-2 bg-[#ff6b4a] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-[#e55a3a] transition-colors"
               >
                 <Plus size={16} /> Generate Key
               </button>
             </div>
 
-            {/* Modal for creating key */}
-            {showKeyModal && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div className="bg-[#0d1117] border border-[#262626] rounded-xl w-full max-w-md overflow-hidden animate-slide-up">
-                  <div className="p-6 border-b border-[#262626]">
-                    <h3 className="font-serif font-bold text-xl text-white">GENERATE ACCESS KEY</h3>
-                  </div>
-                  
-                  {newlyCreatedKey ? (
-                    <div className="p-6 space-y-4">
-                      <div className="bg-[#FF4500]/10 border border-[#FF4500]/20 text-[#FF4500] p-4 rounded text-sm font-technical">
-                        Store this key immediately. You will not be able to see it again.
-                      </div>
-                      <div className="flex items-center gap-2 bg-[#0A0A0A] border border-[#262626] p-3 rounded">
-                        <code className="text-white flex-1 overflow-x-auto whitespace-nowrap">{newlyCreatedKey}</code>
-                        <button 
-                          onClick={() => handleCopy(newlyCreatedKey, 'new')}
-                          className="p-2 text-[#948e9c] hover:text-white bg-[#141218] rounded"
-                        >
-                          {copied === 'new' ? <Check size={16} className="text-[#FF4500]" /> : <Copy size={16} />}
-                        </button>
-                      </div>
-                      <button 
-                        onClick={() => {
-                          setNewlyCreatedKey(null)
-                          setShowKeyModal(false)
-                        }}
-                        className="w-full bg-[#262626] text-white py-3 rounded font-technical text-technical-label uppercase hover:bg-[#36343a] transition-colors"
-                      >
-                        I HAVE STORED THE KEY
-                      </button>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleCreateKey} className="p-6 space-y-6">
-                      <div>
-                        <label className="font-technical text-technical-label text-[#948e9c] block mb-2 uppercase">Key Designation</label>
-                        <input 
-                          type="text" 
-                          value={newKeyName}
-                          onChange={(e) => setNewKeyName(e.target.value)}
-                          placeholder="e.g. Production Backend"
-                          className="w-full bg-[#0A0A0A] border border-[#262626] text-white py-3 px-4 rounded outline-none focus:border-[#FF4500] font-technical transition-colors"
-                          required
-                          autoFocus
-                        />
-                      </div>
-                      <div className="flex gap-3">
-                        <button 
-                          type="button" 
-                          onClick={() => setShowKeyModal(false)}
-                          className="flex-1 border border-[#262626] text-[#948e9c] py-3 rounded font-technical text-technical-label uppercase hover:text-white transition-colors"
-                        >
-                          CANCEL
-                        </button>
-                        <button 
-                          type="submit" 
-                          disabled={creatingKey || !newKeyName.trim()}
-                          className="flex-1 bg-[#FF4500] text-white py-3 rounded font-technical text-technical-label uppercase hover:bg-[#D93B00] disabled:opacity-50 flex justify-center items-center gap-2 transition-colors"
-                        >
-                          {creatingKey ? <Loader2 size={16} className="animate-spin" /> : 'GENERATE'}
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            <div className="bg-[#0d1117] border border-[#262626] rounded-xl overflow-hidden">
-              <table className="w-full text-left">
-                <thead className="bg-[#141218] border-b border-[#262626] font-technical text-technical-label text-[#948e9c]">
-                  <tr>
-                    <th className="py-4 px-6 font-normal">DESIGNATION</th>
-                    <th className="py-4 px-6 font-normal">SECRET PREFIX</th>
-                    <th className="py-4 px-6 font-normal">CREATED ON</th>
-                    <th className="py-4 px-6 font-normal text-right">ACTION</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#262626] text-sm">
-                  {loadingKeys ? (
-                    <tr>
-                      <td colSpan={4} className="py-8 text-center text-[#948e9c]">
-                        <Loader2 className="animate-spin mx-auto mb-2" size={24} />
-                        Loading credentials...
-                      </td>
-                    </tr>
-                  ) : keys.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="py-8 text-center text-[#948e9c] font-technical">
-                        No active credentials found. Generate a key to begin.
-                      </td>
-                    </tr>
-                  ) : keys.map(k => (
-                    <tr key={k.id} className="hover:bg-[#141218] transition-colors">
-                      <td className="py-4 px-6 font-medium text-white">{k.name}</td>
-                      <td className="py-4 px-6">
-                        <code className="bg-[#0A0A0A] border border-[#262626] px-3 py-1.5 rounded text-[#948e9c] flex items-center gap-3 w-max font-technical">
-                          {k.key_prefix}*******************
-                          <button onClick={() => handleCopy(k.key_prefix, k.id)} className="text-[#494551] hover:text-[#FF4500] transition-colors">
-                            {copied === k.id ? <Check size={14} /> : <Copy size={14} />}
-                          </button>
-                        </code>
-                      </td>
-                      <td className="py-4 px-6 text-[#948e9c] font-technical">{new Date(k.created_at).toLocaleDateString()}</td>
-                      <td className="py-4 px-6 text-right">
-                        <button 
-                          onClick={() => handleRevokeKey(k.id)}
-                          className="text-red-500 hover:text-red-400 p-2 rounded hover:bg-red-500/10 transition-colors" 
-                          title="Revoke Key"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+            <KeyModal
+              show={showKeyModal}
+              onClose={() => { setShowKeyModal(false); setNewlyCreatedKey(null) }}
+              onSubmit={handleCreateKey}
+              creating={creatingKey}
+              newKey={newlyCreatedKey}
+              newKeyName={newKeyName}
+              setNewKeyName={setNewKeyName}
+              onCopy={() => newlyCreatedKey && handleCopy(newlyCreatedKey, 'newkey')}
+              copied={copied === 'newkey'}
+            />
 
-        {/* Tab Content: Analytics */}
-        {tab === 'usage' && (
-          <div className="animate-fade-in space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-[#0d1117] border border-[#262626] p-4 rounded-xl">
-                <div className="text-[#948e9c] text-[10px] uppercase tracking-widest mb-1">Total Requests (30d)</div>
-                <div className="text-2xl text-white font-bold">{stats?.last_30_days?.total_requests || 0}</div>
-              </div>
-              <div className="bg-[#0d1117] border border-[#262626] p-4 rounded-xl">
-                <div className="text-[#948e9c] text-[10px] uppercase tracking-widest mb-1">Total Tokens (30d)</div>
-                <div className="text-2xl text-white font-bold">{(stats?.last_30_days?.total_tokens / 1000).toFixed(1)}k</div>
-              </div>
-              <div className="bg-[#0d1117] border border-[#262626] p-4 rounded-xl">
-                <div className="text-[#948e9c] text-[10px] uppercase tracking-widest mb-1">Avg Latency</div>
-                <div className="text-2xl text-white font-bold">{Math.round(stats?.last_30_days?.avg_latency_ms || 0)}ms</div>
-              </div>
-              <div className="bg-[#0d1117] border border-[#262626] p-4 rounded-xl">
-                <div className="text-[#948e9c] text-[10px] uppercase tracking-widest mb-1">Total Cost (30d)</div>
-                <div className="text-2xl text-[#00ff9d] font-bold">৳{stats?.last_30_days?.total_cost_bdt?.toFixed(2) || '0.00'}</div>
-              </div>
-            </div>
-
-            <div className="bg-[#0d1117] border border-[#262626] rounded-xl overflow-hidden">
-              <div className="p-6 border-b border-[#262626]">
-                <h3 className="font-serif font-bold text-white uppercase">Model Distribution</h3>
-              </div>
-              <div className="p-6">
-                {loadingStats ? (
-                  <div className="flex justify-center py-12"><Loader2 className="animate-spin text-[#FF4500]" /></div>
-                ) : stats?.model_breakdown?.length > 0 ? (
-                  <div className="space-y-4">
-                    {stats.model_breakdown.map((m: any) => (
-                      <div key={m.model} className="space-y-2">
-                        <div className="flex justify-between text-xs font-technical uppercase">
-                          <span>{m.model}</span>
-                          <span>{m.requests} reqs</span>
-                        </div>
-                        <div className="h-2 bg-[#0A0A0A] rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-[#FF4500]" 
-                            style={{ width: `${(m.requests / stats.last_30_days.total_requests) * 100}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 text-[#494551] font-technical">NO USAGE DATA DETECTED</div>
-                )}
+            <div className="bg-[#111118] border border-[#1f1f23] rounded-2xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left min-w-[600px]">
+                  <thead>
+                    <tr className="border-b border-[#1f1f23] text-[10px] uppercase tracking-wider text-[#6b6b76]">
+                      <th className="py-3 px-5 font-medium">Name</th>
+                      <th className="py-3 px-5 font-medium">Key Prefix</th>
+                      <th className="py-3 px-5 font-medium">Created</th>
+                      <th className="py-3 px-5 font-medium text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm">
+                    {loadingKeys ? (
+                      [...Array(3)].map((_, i) => (
+                        <tr key={i} className="border-b border-[#1f1f23]">
+                          {[...Array(4)].map((_, j) => (
+                            <td key={j} className="py-4 px-5">
+                              <div className="h-4 bg-[#1f1f23] rounded animate-pulse" style={{ width: `${40 + Math.random() * 40}%` }} />
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    ) : keys.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="py-12 text-center text-[#6b6b76] text-sm">
+                          No API keys yet. Generate one to get started.
+                        </td>
+                      </tr>
+                    ) : (
+                      keys.map(k => (
+                        <tr key={k.id} className="border-b border-[#1f1f23]/60 hover:bg-[#ffffff04] transition-colors">
+                          <td className="py-4 px-5 font-medium text-white">{k.name}</td>
+                          <td className="py-4 px-5">
+                            <div className="inline-flex items-center gap-2 bg-[#0a0a0f] border border-[#1f1f23] px-3 py-1.5 rounded-lg">
+                              <code className="text-[#9b9ba8] text-xs font-mono">{k.key_prefix}••••••••</code>
+                              <button onClick={() => handleCopy(k.key_prefix, k.id)} className="text-[#4a4a56] hover:text-[#ff6b4a] transition-colors">
+                                {copied === k.id ? <Check size={12} className="text-[#00ff88]" /> : <Copy size={12} />}
+                              </button>
+                            </div>
+                          </td>
+                          <td className="py-4 px-5 text-[#6b6b76] text-xs font-mono">{new Date(k.created_at).toLocaleDateString()}</td>
+                          <td className="py-4 px-5 text-right">
+                            <button onClick={() => handleRevokeKey(k.id)} className="text-red-500/60 hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition-colors" title="Revoke">
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab Content: Logs */}
+        {/* ═══ LOGS TAB ═══ */}
         {tab === 'logs' && (
-          <div className="animate-fade-in bg-[#0d1117] border border-[#262626] rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-[#262626] flex justify-between items-center">
-              <h3 className="font-serif font-bold text-white uppercase">Real-time Traffic Firehose</h3>
-              <button onClick={fetchUsage} className="text-xs text-[#FF4500] hover:underline font-technical uppercase tracking-widest flex items-center gap-2">
-                <Activity size={14} /> Refresh
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-[#141218] border-b border-[#262626] font-technical text-[10px] text-[#948e9c] uppercase tracking-widest">
-                  <tr>
-                    <th className="py-4 px-6">Timestamp</th>
-                    <th className="py-4 px-6">Model</th>
-                    <th className="py-4 px-6">Tokens</th>
-                    <th className="py-4 px-6">Cost</th>
-                    <th className="py-4 px-6 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#262626] text-[11px] font-technical">
-                  {loadingUsage ? (
-                    <tr><td colSpan={5} className="py-12 text-center"><Loader2 className="animate-spin mx-auto text-[#FF4500]" /></td></tr>
-                  ) : usage.length === 0 ? (
-                    <tr><td colSpan={5} className="py-12 text-center text-[#494551]">AWAITING FIRST REQUEST...</td></tr>
-                  ) : usage.map((u, i) => (
-                    <tr key={i} className="hover:bg-[#141218] transition-colors">
-                      <td className="py-3 px-6 text-[#948e9c]">{new Date(u.timestamp).toLocaleString()}</td>
-                      <td className="py-3 px-6 text-white uppercase">{u.model}</td>
-                      <td className="py-3 px-6">{u.tokens}</td>
-                      <td className="py-3 px-6">৳{u.cost_bdt.toFixed(4)}</td>
-                      <td className="py-3 px-6 text-right">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${u.status === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                          {u.status.toUpperCase()}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <LogsTable
+            logs={usage}
+            loading={loadingUsage}
+            total={usageTotal}
+            limit={usageLimit}
+            offset={usageOffset}
+            onPageChange={(newOffset) => fetchUsage(newOffset)}
+          />
         )}
       </main>
     </div>

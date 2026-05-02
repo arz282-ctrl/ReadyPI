@@ -20,8 +20,9 @@ let admin;
 try {
   admin = require('firebase-admin');
   if (!admin.apps.length) {
+    // Only projectId is needed for verifyIdToken() — it uses Google's public keys
     admin.initializeApp({
-      credential: admin.credential.applicationDefault(),
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'readypi-core',
     });
   }
 } catch (err) {
@@ -99,6 +100,10 @@ async function upsertFirebaseUser(decodedToken) {
   const insertResult = await db.query(
     `INSERT INTO users (email, password_hash, full_name, plan_tier, email_verified)
      VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (email) DO UPDATE SET
+       full_name = COALESCE(NULLIF(EXCLUDED.full_name, ''), users.full_name),
+       email_verified = GREATEST(EXCLUDED.email_verified, users.email_verified),
+       updated_at = CURRENT_TIMESTAMP
      RETURNING id, email, full_name, plan_tier, created_at`,
     [email.toLowerCase(), placeholderHash, fullName, 'free', emailVerified]
   );

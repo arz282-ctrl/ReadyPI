@@ -120,10 +120,9 @@ export const authAPI = {
 
 export const creditsAPI = {
   balance: () => api.get('/credits/balance'),
-  history: () => api.get('/credits/history'),
   usage: (params?: { limit?: number; offset?: number }) => api.get('/credits/usage', { params }),
   stats: () => api.get('/credits/stats'),
-  createPayment: (packageId: string, method: string) => 
+  createPayment: (packageId: string, method: string) =>
     api.post('/payment/create', { package_id: packageId, payment_method: method }),
 };
 

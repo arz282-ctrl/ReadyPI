@@ -1,0 +1,11 @@
+node_modules
+api/node_modules
+.git
+logs
+api/logs
+*.log
+*.zip
+dist
+build
+.next
+__pycache__

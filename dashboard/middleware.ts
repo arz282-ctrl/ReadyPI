@@ -4,11 +4,14 @@ import { NextRequest, NextResponse } from 'next/server';
  * Next.js Middleware — Route Protection
  *
  * Redirects unauthenticated users away from protected routes.
- * Checks for the readypi_session cookie (set by /api/auth/exchange)
- * or the presence of a client-side token indicator.
+ * Checks for the readypi_session cookie (set during login/exchange).
  *
- * Protected routes: /dashboard, /billing, /playground, /models, /checkout, /docs
- * Public routes: /, /login, /signup, /pricing, /api/*
+ * Protected routes: /dashboard, /billing, /checkout
+ * Public routes: /, /login, /signup, /pricing, /docs, /playground, /models, /api/*
+ *
+ * NOTE: The cookie is a JWT but we do NOT verify it here (no secret in Edge).
+ * The backend verifies the JWT on every API call. The cookie is only a
+ * gate-check to prevent SSR of protected pages for unauthenticated visitors.
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -30,6 +33,18 @@ export function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Basic JWT structure validation (3 dot-separated base64 segments)
+  // This prevents malformed cookies from granting access to protected pages
+  const parts = sessionCookie.value.split('.');
+  if (parts.length !== 3) {
+    // Invalid JWT format — clear the cookie and redirect
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    const response = NextResponse.redirect(loginUrl);
+    response.cookies.set('readypi_session', '', { path: '/', maxAge: 0 });
+    return response;
   }
 
   return NextResponse.next();

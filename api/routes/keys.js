@@ -41,10 +41,10 @@ router.get('/', verifyJWT, async (req, res) => {
 });
 
 /**
- * POST /keys/create
+ * POST /keys
  * Generate new API key
  */
-router.post('/create', verifyJWT, async (req, res) => {
+router.post('/', verifyJWT, async (req, res) => {
   try {
     const { name, environment = 'live' } = req.body;
 

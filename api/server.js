@@ -119,10 +119,10 @@ async function startServer() {
   }
 
   // Start Express server
-  app.listen(PORT, '127.0.0.1', () => {
-    logger.info(`ReadyPi API Gateway running on http://127.0.0.1:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`ReadyPi API Gateway running on http://0.0.0.0:${PORT}`);
     logger.info(`Environment: ${process.env.NODE_ENV}`);
-    logger.info(`Base URL: ${process.env.API_BASE_URL || `http://127.0.0.1:${PORT}`}`);
+    logger.info(`Base URL: ${process.env.API_BASE_URL || `http://0.0.0.0:${PORT}`}`);
   });
 }
 

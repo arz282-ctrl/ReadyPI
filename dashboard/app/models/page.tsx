@@ -12,6 +12,7 @@ export default function ModelsPage() {
     { id: 'meta-llama/llama-3-70b-instruct', name: 'Llama 3 70B', provider: 'Groq', context: '8K', promptPrice: 0.50, completionPrice: 0.60, latency: '0.2s', isFree: true, features: ['Text'] },
     { id: 'google/gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'Google', context: '1M', promptPrice: 0.15, completionPrice: 0.30, latency: '0.4s', isFree: true, features: ['Text', 'Vision', 'Tools'] },
     { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', provider: 'DeepSeek', context: '64K', promptPrice: 0.20, completionPrice: 0.40, latency: '0.4s', isFree: true, features: ['Text', 'Code'] },
+    { id: 'deepseek/deepseek-reasoner', name: 'DeepSeek R1', provider: 'DeepSeek', context: '64K', promptPrice: 2.00, completionPrice: 4.50, latency: '1.2s', isFree: false, features: ['Reasoning', 'Math', 'Code'] },
     { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI', context: '128K', promptPrice: 5.00, completionPrice: 15.00, latency: '0.6s', isFree: false, features: ['Text', 'Vision', 'Tools'] },
     { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', context: '200K', promptPrice: 3.00, completionPrice: 15.00, latency: '0.5s', isFree: false, features: ['Text', 'Vision', 'Tools'] },
     { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI', context: '128K', promptPrice: 0.15, completionPrice: 0.60, latency: '0.3s', isFree: false, features: ['Text', 'Vision'] },

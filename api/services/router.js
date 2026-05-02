@@ -1,6 +1,16 @@
 const axios = require('axios');
 const logger = require('../utils/logger');
 
+// AWS SDK v3 for Bedrock
+let BedrockRuntimeClient, InvokeModelCommand;
+try {
+  const bedrock = require('@aws-sdk/client-bedrock-runtime');
+  BedrockRuntimeClient = bedrock.BedrockRuntimeClient;
+  InvokeModelCommand = bedrock.InvokeModelCommand;
+} catch (e) {
+  logger.warn('AWS SDK not installed. Run: npm install @aws-sdk/client-bedrock-runtime');
+}
+
 /**
  * Route AI requests to appropriate provider
  */
@@ -61,6 +71,27 @@ class AIRouter {
           'claude-3-5-haiku@20241022',
           'llama-3-405b-instruct'
         ]
+      },
+      modal: {
+        baseURL: 'https://api.us-west-2.modal.direct/v1',
+        apiKey: process.env.MODAL_API_KEY,
+        models: ['zai-org/GLM-5.1-FP8']
+      },
+      bedrock: {
+        region: process.env.AWS_REGION || 'us-east-1',
+        models: [
+          'anthropic.claude-3-5-sonnet-20241022-v2:0',
+          'anthropic.claude-3-5-haiku-20241022-v1:0',
+          'anthropic.claude-3-haiku-20240307-v1:0',
+          'meta.llama3-1-70b-instruct-v1:0',
+          'meta.llama3-1-8b-instruct-v1:0',
+          'mistral.mistral-7b-instruct-v0:2',
+          'mistral.mixtral-8x7b-instruct-v0:1',
+          'amazon.titan-text-express-v1',
+          'amazon.nova-micro-v1:0',
+          'amazon.nova-lite-v1:0',
+          'amazon.nova-pro-v1:0'
+        ]
       }
     };
   }
@@ -94,6 +125,12 @@ class AIRouter {
         
         case 'vertex':
           return await this.callVertex({ model, messages, temperature, max_tokens, stream });
+        
+        case 'modal':
+          return await this.callModal({ model, messages, temperature, max_tokens, stream });
+        
+        case 'bedrock':
+          return await this.callBedrock({ model, messages, temperature, max_tokens });
         
         default:
           throw new Error(`Unsupported provider: ${provider}`);
@@ -432,6 +469,144 @@ class AIRouter {
         }
       };
     }
+  }
+
+  /**
+   * Call Modal API (GLM-5.1 and other hosted models)
+   * OpenAI-compatible format
+   */
+  async callModal({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
+    const modelMap = {
+      'readypi/glm-5.1': 'zai-org/GLM-5.1-FP8'
+    };
+
+    const targetModel = modelMap[model] || 'zai-org/GLM-5.1-FP8';
+
+    const response = await axios.post(
+      `${this.providers.modal.baseURL}/chat/completions`,
+      {
+        model: targetModel,
+        messages,
+        temperature,
+        max_tokens
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${this.providers.modal.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return {
+      content: response.data.choices[0].message.content,
+      finish_reason: response.data.choices[0].finish_reason,
+      usage: response.data.usage || {
+        prompt_tokens: 0,
+        completion_tokens: 0,
+        total_tokens: 0
+      }
+    };
+  }
+
+  /**
+   * Call AWS Bedrock (Claude, Llama, Mistral, Amazon Nova/Titan)
+   * Uses AWS SDK v3 with credentials from ~/.aws/credentials
+   */
+  async callBedrock({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
+    if (!BedrockRuntimeClient) {
+      throw new Error('AWS SDK not installed. Run: npm install @aws-sdk/client-bedrock-runtime');
+    }
+
+    const modelMap = {
+      'readypi/bedrock-claude-sonnet': 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+      'readypi/bedrock-claude-haiku': 'anthropic.claude-3-5-haiku-20241022-v1:0',
+      'readypi/bedrock-claude-haiku-3': 'anthropic.claude-3-haiku-20240307-v1:0',
+      'readypi/bedrock-llama-70b': 'meta.llama3-1-70b-instruct-v1:0',
+      'readypi/bedrock-llama-8b': 'meta.llama3-1-8b-instruct-v1:0',
+      'readypi/bedrock-mistral-7b': 'mistral.mistral-7b-instruct-v0:2',
+      'readypi/bedrock-mixtral': 'mistral.mixtral-8x7b-instruct-v0:1',
+      'readypi/bedrock-titan': 'amazon.titan-text-express-v1',
+      'readypi/bedrock-nova-micro': 'amazon.nova-micro-v1:0',
+      'readypi/bedrock-nova-lite': 'amazon.nova-lite-v1:0',
+      'readypi/bedrock-nova-pro': 'amazon.nova-pro-v1:0',
+    };
+
+    const targetModel = modelMap[model] || model;
+    const region = this.providers.bedrock.region;
+
+    const client = new BedrockRuntimeClient({ region });
+
+    // Anthropic Claude models use the Messages API format
+    if (targetModel.startsWith('anthropic.')) {
+      const systemMessage = messages.find(m => m.role === 'system');
+      const userMessages = messages.filter(m => m.role !== 'system');
+
+      const body = JSON.stringify({
+        anthropic_version: 'bedrock-2023-05-31',
+        messages: userMessages.map(m => ({ role: m.role, content: m.content })),
+        system: systemMessage?.content || '',
+        max_tokens,
+        temperature,
+      });
+
+      const command = new InvokeModelCommand({
+        modelId: targetModel,
+        contentType: 'application/json',
+        accept: 'application/json',
+        body,
+      });
+
+      const response = await client.send(command);
+      const result = JSON.parse(new TextDecoder().decode(response.body));
+
+      return {
+        content: result.content?.[0]?.text || '',
+        finish_reason: result.stop_reason || 'stop',
+        usage: {
+          prompt_tokens: result.usage?.input_tokens || 0,
+          completion_tokens: result.usage?.output_tokens || 0,
+          total_tokens: (result.usage?.input_tokens || 0) + (result.usage?.output_tokens || 0),
+        },
+      };
+    }
+
+    // All other models (Llama, Mistral, Amazon Nova/Titan) use the Converse API
+    const { ConverseCommand } = require('@aws-sdk/client-bedrock-runtime');
+    
+    const systemMessage = messages.find(m => m.role === 'system');
+    const conversationMessages = messages
+      .filter(m => m.role !== 'system')
+      .map(m => ({
+        role: m.role,
+        content: [{ text: m.content }],
+      }));
+
+    const converseParams = {
+      modelId: targetModel,
+      messages: conversationMessages,
+      inferenceConfig: {
+        maxTokens: max_tokens,
+        temperature,
+      },
+    };
+
+    if (systemMessage) {
+      converseParams.system = [{ text: systemMessage.content }];
+    }
+
+    const command = new ConverseCommand(converseParams);
+    const response = await client.send(command);
+
+    return {
+      content: response.output?.message?.content?.[0]?.text || '',
+      finish_reason: response.stopReason || 'stop',
+      usage: {
+        prompt_tokens: response.usage?.inputTokens || 0,
+        completion_tokens: response.usage?.outputTokens || 0,
+        total_tokens: (response.usage?.inputTokens || 0) + (response.usage?.outputTokens || 0),
+      },
+    };
   }
 }
 

@@ -14,6 +14,13 @@ class PaymentService {
     this.sslBaseUrl = this.isLive 
       ? 'https://securepay.sslcommerz.com' 
       : 'https://sandbox.sslcommerz.com';
+    
+    // NOWPayments config
+    this.npApiKey = process.env.NOWPAYMENTS_API_KEY;
+    this.npIpnSecret = process.env.NOWPAYMENTS_IPN_SECRET;
+    this.npBaseUrl = process.env.NOWPAYMENTS_IS_SANDBOX === 'true'
+      ? 'https://api-sandbox.nowpayments.io/v1'
+      : 'https://api.nowpayments.io/v1';
   }
 
   /**
@@ -83,6 +90,42 @@ class PaymentService {
     } catch (error) {
       logger.error('SSLCommerz validation error:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Initialize NOWPayments session (International)
+   */
+  async initNOWPayments({ transactionId, totalAmount, currency = 'USD', customerEmail }) {
+    try {
+      // Convert BDT to USD approximately for NOWPayments if needed, 
+      // or assume the price passed is already in the target currency.
+      // For this implementation, we assume the dashboard sends BDT, so we convert.
+      const amountInUSD = (totalAmount / 115).toFixed(2); 
+
+      const response = await axios.post(`${this.npBaseUrl}/payment`, {
+        price_amount: amountInUSD,
+        price_currency: 'usd',
+        pay_currency: 'usdttrc20', // Default, can be changed by user on NP side
+        order_id: transactionId,
+        order_description: 'ReadyPI Credits Top-up',
+        ipn_callback_url: `${process.env.API_BASE_URL}/payment/callback/nowpayments/ipn`,
+        success_url: `${process.env.DASHBOARD_URL}/dashboard?payment=success`,
+        cancel_url: `${process.env.DASHBOARD_URL}/billing?payment=cancelled`,
+      }, {
+        headers: {
+          'x-api-key': this.npApiKey,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      return {
+        gatewayUrl: response.data.invoice_url || response.data.payment_url,
+        paymentId: response.data.payment_id
+      };
+    } catch (error) {
+      logger.error('NOWPayments init error:', error.response?.data || error.message);
+      throw new Error('NOWPayments initialization failed');
     }
   }
 }
