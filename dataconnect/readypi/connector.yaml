@@ -1,0 +1,5 @@
+connectorId: "readypi"
+generate:
+  javascriptSdk:
+    outputDir: "../src/dataconnect-generated"
+    package: "@readypi/sdk"
