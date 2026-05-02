@@ -18,7 +18,8 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(curl -s -m 5 -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/)",
       "Bash(npx next *)",
-      "Bash(curl -s -m 5 -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/terms)"
+      "Bash(curl -s -m 5 -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/terms)",
+      "Bash(npx tsc *)"
     ]
   }
 }
