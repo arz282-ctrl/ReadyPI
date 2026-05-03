@@ -77,3 +77,6 @@ skills-lock.json
 *.pdf
 ReadyPI Complete UI:Ux.zip
 ReadyPI Complete Ui:Ux/
+
+# Claude worktrees
+.claude/
