@@ -116,7 +116,7 @@ CREATE INDEX idx_subscriptions_period_end ON subscriptions(current_period_end);
 CREATE TABLE usage_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    api_key_id UUID NOT NULL REFERENCES api_keys(id) ON DELETE CASCADE,
+    api_key_id UUID REFERENCES api_keys(id) ON DELETE CASCADE,
     model VARCHAR(100) NOT NULL, -- e.g., "readypi/gpt4o", "readypi/claude-sonnet"
     provider VARCHAR(50) NOT NULL, -- openai, anthropic, google, groq, deepseek
     prompt_tokens INTEGER NOT NULL,
