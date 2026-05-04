@@ -15,6 +15,9 @@ const paymentRoutes = require('./routes/payment');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy - required for Cloud Run
+app.set('trust proxy', true);
+
 // ============================================================================
 // MIDDLEWARE
 // ============================================================================
