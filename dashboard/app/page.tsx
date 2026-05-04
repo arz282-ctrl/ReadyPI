@@ -3,27 +3,15 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { 
-  Search, Terminal, BookOpen, Key, Activity, Zap, Layers, Network, ShieldCheck, 
+import {
+  Search, Terminal, BookOpen, Key, Activity, Zap, Layers, Network, ShieldCheck,
   ChevronRight, Globe, CreditCard, Code, ArrowRight, Lock, Gauge, Users, Menu, X,
-  Rocket, Server, Clock, CheckCircle, Star, TrendingUp, Shield, Eye, EyeOff,
-  ChevronDown, ExternalLink, Crown, Award, BadgeCheck, Headphones, BookText,
-  Twitter, Github, Linkedin, MessageCircle, BarChart3, ArrowDownRight
+  Rocket, Server, Clock, Star, Shield, Headphones,
+  Twitter, Github, Linkedin, MessageCircle, BarChart3
 } from 'lucide-react'
 import PiMark from '@/components/PiMark'
-import { CursorTrail, CustomCursor } from '@/lib/cursor'
-import { SmoothTilt } from '@/lib/tilt'
-import { AnimatedCounter, StatCard } from '@/components/ui/animated-counter'
-import { GlowingOrb, RevealOnScroll, FloatingElement, StaggerContainer, staggerItemVariants } from '@/components/ui/motion-primitives'
-
-// Animation variants
-const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.8, delay: 0.2 + i * 0.12, ease: "easeOut" },
-  }),
-}
+import { StatCard } from '@/components/ui/animated-counter'
+import { RevealOnScroll, staggerItemVariants } from '@/components/ui/motion-primitives'
 
 // Provider data - OpenRouter-style model showcase
 const providers = [
@@ -419,24 +407,14 @@ export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeCodeTab, setActiveCodeTab] = useState(0)
-  const [hoveredProvider, setHoveredProvider] = useState<string | null>(null)
   const [activeProvider, setActiveProvider] = useState<string>('all')
   
   useEffect(() => { setMounted(true) }, [])
 
   if (!mounted) return null
 
-  // Filter providers
-  const filteredProviders = activeProvider === 'all' 
-    ? providers 
-    : providers.filter(p => p.id === activeProvider || p.featured.includes(activeProvider))
-
   return (
     <main className="min-h-screen bg-[#0a0a0f] text-gray-300 overflow-hidden">
-      {/* Custom Cursor */}
-      <CustomCursor show={true} />
-      <CursorTrail enabled={true} maxPoints={6} delay={40} color="#ff6b4a" size={6} />
-
       {/* ── Navigation ── */}
       <nav className="sticky top-0 z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-gray-800/50 px-4 sm:px-6 py-3 sm:py-4">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
@@ -493,10 +471,10 @@ export default function Home() {
 
       {/* ── HERO SECTION ── */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-8 sm:pt-0">
-        {/* Ambient orbs */}
-        <GlowingOrb className="-top-40 -left-40" color="#ff6b4a" size={600} />
-        <GlowingOrb className="-bottom-40 -right-40" color="#c8381a" size={500} />
-        <GlowingOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" color="#00ff88" size={300} />
+        {/* Ambient orbs — static, no JS animation */}
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-3xl pointer-events-none opacity-30" style={{ background: 'radial-gradient(circle, rgba(255,107,74,0.2) 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full blur-3xl pointer-events-none opacity-30" style={{ background: 'radial-gradient(circle, rgba(200,56,26,0.2) 0%, transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-20 hidden sm:block" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.15) 0%, transparent 70%)' }} />
 
         {/* Animated grid background */}
         <div className="absolute inset-0 opacity-[0.04]" style={{ 
@@ -555,21 +533,19 @@ export default function Home() {
           </motion.div>
 
           {/* Right: Enhanced PiMark Hero */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, delay: 0.3 }}
             className="hidden lg:flex flex-1 items-center justify-center"
           >
-            <FloatingElement duration={6} distance={20}>
-              <PiMark 
-                variant="hero" 
-                size={420} 
-                showEyes={true}
-                showOrbit={true}
-                showLabels={true}
-              />
-            </FloatingElement>
+            <PiMark
+              variant="hero"
+              size={420}
+              showEyes={true}
+              showOrbit={true}
+              showLabels={true}
+            />
           </motion.div>
         </div>
 
@@ -657,93 +633,55 @@ export default function Home() {
           </div>
 
           {/* Provider Grid */}
-          <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
-            layout
-          >
-            {providers.map((provider, i) => (
-              <motion.div
-                key={provider.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <SmoothTilt strength={8}>
-                  <div 
-                    className="relative group h-full bg-[#0a0a0f] border border-gray-800 rounded-2xl p-6 transition-all duration-500 hover:border-[#ff6b4a]/30 cursor-pointer"
-                    onMouseEnter={() => setHoveredProvider(provider.id)}
-                    onMouseLeave={() => setHoveredProvider(null)}
-                  >
-                    {/* Gradient glow */}
-                    <div 
-                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{
-                        background: `radial-gradient(circle at 50% 0%, ${provider.color}10 0%, transparent 60%)`,
-                      }}
-                    />
-
-                    <div className="relative z-10">
-                      {/* Provider Header */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div 
-                          className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                          style={{ backgroundColor: `${provider.color}20`, color: provider.color }}
-                        >
-                          {provider.logo}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-xs text-gray-500">{provider.status}</span>
-                        </div>
-                      </div>
-
-                      {/* Provider Name & Description */}
-                      <h3 className="text-white font-bold text-lg mb-1">{provider.name}</h3>
-                      <p className="text-gray-500 text-xs mb-4">{provider.description}</p>
-
-                      {/* Stats */}
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-600">
-                          <span className="text-white font-semibold">{provider.models}</span> models
-                        </span>
-                        <span className="text-[#ff6b4a]">
-                          {provider.latency} avg
-                        </span>
-                      </div>
-
-                      {/* Hover Details */}
-                      <AnimatePresence>
-                        {hoveredProvider === provider.id && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-4 pt-4 border-t border-gray-800"
-                          >
-                            <div className="space-y-2 text-xs">
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Best for</span>
-                                <span className="text-gray-300">{providerDetails[provider.id as keyof typeof providerDetails]?.bestFor[0]}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Starting from</span>
-                                <span className="text-[#ff6b4a]">{providerDetails[provider.id as keyof typeof providerDetails]?.pricing}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Uptime</span>
-                                <span className="text-green-500">{provider.uptime}</span>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {providers.map((provider) => (
+              <div key={provider.id} className="relative group h-full bg-[#0a0a0f] border border-gray-800 rounded-2xl p-6 transition-all duration-300 hover:border-[#ff6b4a]/30 cursor-pointer">
+                <div
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: `radial-gradient(circle at 50% 0%, ${provider.color}10 0%, transparent 60%)` }}
+                />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                      style={{ backgroundColor: `${provider.color}20`, color: provider.color }}
+                    >
+                      {provider.logo}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                      <span className="text-xs text-gray-500">{provider.status}</span>
                     </div>
                   </div>
-                </SmoothTilt>
-              </motion.div>
+                  <h3 className="text-white font-bold text-lg mb-1">{provider.name}</h3>
+                  <p className="text-gray-500 text-xs mb-4">{provider.description}</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600"><span className="text-white font-semibold">{provider.models}</span> models</span>
+                    <span className="text-[#ff6b4a]">{provider.latency} avg</span>
+                  </div>
+                  {/* Hover details — CSS only */}
+                  <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+                    <div className="overflow-hidden">
+                      <div className="mt-4 pt-4 border-t border-gray-800 space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Best for</span>
+                          <span className="text-gray-300">{providerDetails[provider.id]?.bestFor[0]}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Starting from</span>
+                          <span className="text-[#ff6b4a]">{providerDetails[provider.id]?.pricing}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Uptime</span>
+                          <span className="text-green-500">{provider.uptime}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* View All Models CTA */}
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-10 text-center">
@@ -770,7 +708,7 @@ export default function Home() {
 
       {/* ── Model Table ── */}
       <section className="py-16 sm:py-24 bg-[#0a0a0f] border-b border-gray-800 relative">
-        <GlowingOrb className="top-0 right-0" color="#ff6b4a" size={400} />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-20 hidden md:block" style={{ background: 'radial-gradient(circle, rgba(255,107,74,0.15) 0%, transparent 70%)' }} />
         <div className="max-w-[1400px] mx-auto px-6 relative z-10">
           <RevealOnScroll>
             <div className="text-center mb-12">
@@ -801,14 +739,7 @@ export default function Home() {
               </thead>
               <tbody className="text-sm">
                 {modelsList.map((model, i) => (
-                    <motion.tr 
-                      key={i}
-                      initial={{ opacity: 0, x: -20 }} 
-                      whileInView={{ opacity: 1, x: 0 }} 
-                      transition={{ delay: i * 0.05 }}
-                      viewport={{ once: true }}
-                      className="border-b border-gray-800/50 hover:bg-[#ff6b4a]/5 transition-colors cursor-pointer group"
-                    >
+                    <tr key={i} className="border-b border-gray-800/50 hover:bg-[#ff6b4a]/5 transition-colors cursor-pointer group">
                       <td className="py-4 px-4 font-semibold text-white flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-[#00ff88] group-hover:scale-150 transition-transform" />
                         <span className="group-hover:text-[#ff6b4a] transition-colors">{model.id}</span>
@@ -825,7 +756,7 @@ export default function Home() {
                           <span className="bg-[#ff6b4a]/10 text-[#ff6b4a] text-[10px] px-2 py-1 rounded uppercase tracking-wide font-bold border border-[#ff6b4a]/20">Premium</span>
                         )}
                       </td>
-                    </motion.tr>
+                    </tr>
                 ))}
               </tbody>
             </table>
@@ -883,16 +814,15 @@ export default function Home() {
           </RevealOnScroll>
 
           <RevealOnScroll direction="right" delay={0.2}>
-            <SmoothTilt strength={8} className="bg-[#0a0a0f] rounded-2xl border border-gray-800 overflow-hidden">
-              {/* Code tabs */}
+            <div className="bg-[#0a0a0f] rounded-2xl border border-gray-800 overflow-hidden">
               <div className="flex border-b border-gray-800">
                 {codeTabs.map((tab, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveCodeTab(i)}
                     className={`flex-1 py-3 px-4 text-xs font-mono transition-all ${
-                      activeCodeTab === i 
-                        ? 'bg-[#ff6b4a]/10 text-[#ff6b4a] border-b-2 border-[#ff6b4a]' 
+                      activeCodeTab === i
+                        ? 'bg-[#ff6b4a]/10 text-[#ff6b4a] border-b-2 border-[#ff6b4a]'
                         : 'text-gray-500 hover:text-white hover:bg-gray-800/50'
                     }`}
                   >
@@ -900,20 +830,19 @@ export default function Home() {
                   </button>
                 ))}
               </div>
-              {/* Code content */}
               <div className="p-6">
                 <pre className="font-mono text-sm text-gray-300 overflow-x-auto">
                   <code>{codeTabs[activeCodeTab].code}</code>
                 </pre>
               </div>
-            </SmoothTilt>
+            </div>
           </RevealOnScroll>
         </div>
       </section>
 
       {/* ── Features Grid ── */}
       <section className="py-16 sm:py-24 bg-[#0a0a0f] border-y border-gray-800/50 relative">
-        <GlowingOrb className="bottom-0 left-1/4" color="#00ff88" size={400} />
+        <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-15 hidden md:block" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.15) 0%, transparent 70%)' }} />
         <div className="max-w-[1400px] mx-auto px-6 relative z-10">
           <RevealOnScroll>
             <div className="text-center mb-12">
@@ -928,8 +857,8 @@ export default function Home() {
               </p>
             </div>
           </RevealOnScroll>
-          
-          <motion.div 
+
+          <motion.div
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={staggerContainer}
             initial="hidden"
@@ -938,27 +867,20 @@ export default function Home() {
           >
             {features.map((f, i) => (
               <motion.div key={i} variants={staggerItemVariants}>
-                <SmoothTilt strength={8}>
-                  <div className={`relative group h-full bg-[#0d1117] border rounded-2xl p-6 transition-all duration-500 ${
-                    f.highlight ? 'border-[#ff6b4a]/30 hover:border-[#ff6b4a]/50' : 'border-gray-800 hover:border-gray-700'
-                  } hover:shadow-[0_0_40px_rgba(255,107,74,0.1)] hover:-translate-y-1`}>
-                    {/* Gradient glow on hover */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff6b4a]/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    
-                    <div className="relative z-10">
-                      <motion.div 
-                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${
-                          f.highlight ? 'bg-[#ff6b4a]/10 text-[#ff6b4a]' : 'bg-gray-800/50 text-gray-400'
-                        }`}
-                      >
-                        {f.icon}
-                      </motion.div>
-                      <h3 className="text-white font-bold text-lg mb-3 font-fraunces">{f.title}</h3>
-                      <p className="text-gray-500 text-sm leading-relaxed font-mono">{f.description}</p>
+                <div className={`relative group h-full bg-[#0d1117] border rounded-2xl p-6 transition-all duration-300 ${
+                  f.highlight ? 'border-[#ff6b4a]/30 hover:border-[#ff6b4a]/50' : 'border-gray-800 hover:border-gray-700'
+                } hover:shadow-[0_0_40px_rgba(255,107,74,0.1)] hover:-translate-y-1`}>
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ff6b4a]/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative z-10">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110 ${
+                      f.highlight ? 'bg-[#ff6b4a]/10 text-[#ff6b4a]' : 'bg-gray-800/50 text-gray-400'
+                    }`}>
+                      {f.icon}
                     </div>
+                    <h3 className="text-white font-bold text-lg mb-3 font-fraunces">{f.title}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed font-mono">{f.description}</p>
                   </div>
-                </SmoothTilt>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -988,28 +910,23 @@ export default function Home() {
           >
             {testimonials.map((t, i) => (
               <motion.div key={i} variants={staggerItemVariants}>
-                <SmoothTilt strength={6}>
-                  <div className="relative h-full bg-[#0a0a0f] border border-gray-800 rounded-2xl p-6 hover:border-[#ff6b4a]/30 transition-all">
-                    {/* Stars */}
-                    <div className="flex gap-1 mb-4">
-                      {[...Array(t.rating)].map((_, j) => (
-                        <Star key={j} size={14} className="fill-[#ff6b4a] text-[#ff6b4a]" />
-                      ))}
+                <div className="relative h-full bg-[#0a0a0f] border border-gray-800 rounded-2xl p-6 hover:border-[#ff6b4a]/30 hover:-translate-y-1 transition-all duration-300">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(t.rating)].map((_, j) => (
+                      <Star key={j} size={14} className="fill-[#ff6b4a] text-[#ff6b4a]" />
+                    ))}
+                  </div>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">"{t.content}"</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff6b4a] to-[#c8381a] flex items-center justify-center text-white font-bold text-sm">
+                      {t.avatar}
                     </div>
-                    {/* Quote */}
-                    <p className="text-gray-300 text-sm leading-relaxed mb-6">"{t.content}"</p>
-                    {/* Author */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff6b4a] to-[#c8381a] flex items-center justify-center text-white font-bold text-sm">
-                        {t.avatar}
-                      </div>
-                      <div>
-                        <div className="text-white font-semibold text-sm">{t.name}</div>
-                        <div className="text-gray-500 text-xs">{t.role}</div>
-                      </div>
+                    <div>
+                      <div className="text-white font-semibold text-sm">{t.name}</div>
+                      <div className="text-gray-500 text-xs">{t.role}</div>
                     </div>
                   </div>
-                </SmoothTilt>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -1018,7 +935,7 @@ export default function Home() {
 
       {/* ── CTA Section ── */}
       <section className="py-20 sm:py-32 relative overflow-hidden">
-        <GlowingOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" color="#ff6b4a" size={600} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl pointer-events-none opacity-25" style={{ background: 'radial-gradient(circle, rgba(255,107,74,0.2) 0%, transparent 70%)' }} />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f] to-[#0d1117]" />
         
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
