@@ -119,14 +119,7 @@ export default function SignupPage() {
         id="signup-form-panel"
         className="w-full md:w-1/2 bg-white/90 md:bg-white backdrop-blur-md md:backdrop-blur-none text-[#0A0A0A] flex flex-col justify-center px-8 md:px-10 py-10 border-b md:border-b-0 md:border-r border-[#262626] relative z-10"
       >
-        {/* Mobile Brand Identity */}
-        <div className="md:hidden mb-6">
-          <BoxReveal boxColor="#FF4500" duration={0.3}>
-            <h1 className="font-headline text-headline-md font-bold tracking-tight uppercase text-[#0A0A0A]">
-              Sovereign Intelligence
-            </h1>
-          </BoxReveal>
-        </div>
+
 
         <div className="w-full max-w-md mx-auto">
           {/* ── Header ── */}
