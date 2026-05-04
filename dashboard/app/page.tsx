@@ -27,98 +27,146 @@ const fadeUp = {
 
 // Provider data - OpenRouter-style model showcase
 const providers = [
-  { 
-    id: 'openai', 
-    name: 'OpenAI', 
-    logo: '⬡', 
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    logo: '⬡',
     color: '#10a37f',
-    models: 12,
-    description: 'GPT-4, GPT-4o, GPT-4 Turbo, and more',
-    featured: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+    models: 18,
+    description: 'GPT-4o, GPT-4 Turbo, o1, o3, and more',
+    featured: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'o1-preview', 'o3-mini'],
     status: 'operational',
     latency: '<100ms',
     uptime: '99.9%'
   },
-  { 
-    id: 'anthropic', 
-    name: 'Anthropic', 
-    logo: '◆', 
+  {
+    id: 'anthropic',
+    name: 'Anthropic',
+    logo: '◆',
     color: '#d4a574',
-    models: 8,
-    description: 'Claude 3.5 Opus, Sonnet, Haiku',
-    featured: ['claude-3.5-opus', 'claude-3.5-sonnet', 'claude-3-haiku'],
+    models: 10,
+    description: 'Claude 4 Opus, Sonnet, Haiku',
+    featured: ['claude-4-opus', 'claude-4-sonnet', 'claude-3.5-haiku'],
     status: 'operational',
     latency: '<150ms',
     uptime: '99.8%'
   },
-  { 
-    id: 'google', 
-    name: 'Google AI', 
-    logo: '◉', 
+  {
+    id: 'google',
+    name: 'Google AI',
+    logo: '◉',
     color: '#4285f4',
-    models: 15,
-    description: 'Gemini Pro, Flash, Ultra',
-    featured: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-pro'],
+    models: 20,
+    description: 'Gemini 2.5, 2.0, 1.5 Pro & Flash',
+    featured: ['gemini-2.5-flash', 'gemini-2.0-pro', 'gemini-1.5-pro', 'gemini-1.5-flash'],
     status: 'operational',
     latency: '<80ms',
     uptime: '99.9%'
   },
-  { 
-    id: 'deepseek', 
-    name: 'DeepSeek', 
-    logo: '◈', 
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    logo: '◈',
     color: '#6366f1',
-    models: 5,
-    description: 'DeepSeek V3, Coder',
-    featured: ['deepseek-chat', 'deepseek-coder'],
+    models: 8,
+    description: 'DeepSeek V3, R1, Coder',
+    featured: ['deepseek-chat', 'deepseek-r1', 'deepseek-coder'],
     status: 'operational',
     latency: '<120ms',
     uptime: '99.7%'
   },
-  { 
-    id: 'groq', 
-    name: 'Groq', 
-    logo: '◇', 
+  {
+    id: 'groq',
+    name: 'Groq',
+    logo: '◇',
     color: '#f97316',
-    models: 6,
-    description: 'Llama 3, Mistral - Ultra fast inference',
-    featured: ['llama-3-70b', 'llama-3-8b', 'mixtral-8x7b'],
+    models: 12,
+    description: 'Llama 3.3, Mixtral — Ultra fast LPU inference',
+    featured: ['llama-3.3-70b', 'llama-3.1-8b', 'mixtral-8x7b'],
     status: 'operational',
     latency: '<50ms',
     uptime: '99.9%'
   },
-  { 
-    id: 'mistral', 
-    name: 'Mistral AI', 
-    logo: '△', 
+  {
+    id: 'mistral',
+    name: 'Mistral AI',
+    logo: '△',
     color: '#ff6b4a',
-    models: 7,
-    description: 'Mistral Large, Medium, Small',
-    featured: ['mistral-large', 'mistral-medium', 'mistral-small'],
+    models: 10,
+    description: 'Mistral Large, Nemo, Codestral',
+    featured: ['mistral-large', 'mistral-nemo', 'codestral'],
     status: 'operational',
     latency: '<100ms',
     uptime: '99.6%'
   },
-  { 
-    id: 'meta', 
-    name: 'Meta AI', 
-    logo: '⬢', 
+  {
+    id: 'meta',
+    name: 'Meta AI',
+    logo: '⬢',
     color: '#0668c4',
-    models: 4,
-    description: 'Llama 3.1, 3.2 variants',
-    featured: ['llama-3.1-70b', 'llama-3.2-90b'],
+    models: 15,
+    description: 'Llama 3.3, 3.2, 3.1 — all sizes',
+    featured: ['llama-3.3-70b', 'llama-3.2-90b-vision', 'llama-3.1-405b'],
     status: 'operational',
     latency: '<120ms',
     uptime: '99.5%'
   },
-  { 
-    id: 'azure', 
-    name: 'Microsoft Azure', 
-    logo: '◻', 
+  {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    logo: '⊕',
+    color: '#8b5cf6',
+    models: 30,
+    description: 'Free tier models — Gemini, Llama, Qwen, Phi',
+    featured: ['gemini-2.5-flash-free', 'llama-3.3-70b-free', 'qwen-2.5-72b-free'],
+    status: 'operational',
+    latency: '<200ms',
+    uptime: '99.5%'
+  },
+  {
+    id: 'vertex',
+    name: 'Google Vertex',
+    logo: '▲',
+    color: '#34a853',
+    models: 12,
+    description: 'Enterprise Gemini, Claude via Vertex AI',
+    featured: ['vertex-gemini-1.5-pro', 'vertex-claude-sonnet'],
+    status: 'operational',
+    latency: '<120ms',
+    uptime: '99.9%'
+  },
+  {
+    id: 'aws',
+    name: 'AWS Bedrock',
+    logo: '◼',
+    color: '#ff9900',
+    models: 10,
+    description: 'Claude, Titan, Llama via AWS',
+    featured: ['bedrock-claude-sonnet', 'bedrock-titan'],
+    status: 'operational',
+    latency: '<150ms',
+    uptime: '99.9%'
+  },
+  {
+    id: 'cohere',
+    name: 'Cohere',
+    logo: '◎',
+    color: '#39c2a0',
+    models: 6,
+    description: 'Command R+, Embed, Rerank',
+    featured: ['command-r-plus', 'command-r'],
+    status: 'operational',
+    latency: '<130ms',
+    uptime: '99.7%'
+  },
+  {
+    id: 'azure',
+    name: 'Microsoft Azure',
+    logo: '◻',
     color: '#0078d4',
     models: 10,
-    description: 'Azure OpenAI Service',
-    featured: ['gpt-4-azure', 'gpt-35-azure'],
+    description: 'Azure OpenAI, Phi, Orca',
+    featured: ['gpt-4-azure', 'phi-3-azure'],
     status: 'operational',
     latency: '<100ms',
     uptime: '99.9%'
@@ -126,7 +174,7 @@ const providers = [
 ]
 
 // Detailed provider info for hover cards
-const providerDetails = {
+const providerDetails: Record<string, { website: string; founded: string; headquarters: string; bestFor: string[]; pricing: string; keyFeatures: string[] }> = {
   openai: {
     website: 'https://openai.com',
     founded: '2015',
@@ -183,6 +231,38 @@ const providerDetails = {
     pricing: 'From ৳0.05/1K tokens',
     keyFeatures: ['Open source', 'Llama Guard', 'Quantized versions', 'Large scale'],
   },
+  openrouter: {
+    website: 'https://openrouter.ai',
+    founded: '2023',
+    headquarters: 'San Francisco, CA',
+    bestFor: ['Free models', 'Aggregated access', 'Experimentation'],
+    pricing: 'From ৳0.00/1K tokens',
+    keyFeatures: ['Free tier models', 'Multi-provider', 'Rate limit pooling', 'Fallbacks'],
+  },
+  vertex: {
+    website: 'https://cloud.google.com/vertex-ai',
+    founded: '2021',
+    headquarters: 'Mountain View, CA',
+    bestFor: ['Enterprise GCP', 'Compliance', 'Multi-model'],
+    pricing: 'From ৳0.35/1K tokens',
+    keyFeatures: ['GCP native', 'SOC2/ISO', 'Private endpoints', 'Model Garden'],
+  },
+  aws: {
+    website: 'https://aws.amazon.com/bedrock',
+    founded: '2023',
+    headquarters: 'Seattle, WA',
+    bestFor: ['Enterprise AWS', 'Private deployment', 'Compliance'],
+    pricing: 'From ৳0.40/1K tokens',
+    keyFeatures: ['AWS native', 'VPC endpoints', 'Guardrails', 'Multi-model'],
+  },
+  cohere: {
+    website: 'https://cohere.com',
+    founded: '2019',
+    headquarters: 'Toronto, Canada',
+    bestFor: ['RAG', 'Enterprise search', 'Embeddings'],
+    pricing: 'From ৳0.30/1K tokens',
+    keyFeatures: ['Command R+', 'Embed v3', 'Rerank', 'Tool use'],
+  },
   azure: {
     website: 'https://azure.microsoft.com',
     founded: '2010',
@@ -195,26 +275,38 @@ const providerDetails = {
 
 // Models data
 const modelsList = [
-  { id: 'meta-llama/llama-3-70b-instruct', name: 'Llama 3 70B', provider: 'Groq', context: '8K', promptPrice: '৳0.50', completionPrice: '৳0.60', latency: '0.2s', isFree: true },
-  { id: 'google/gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'Google', context: '1M', promptPrice: '৳0.15', completionPrice: '৳0.30', latency: '0.4s', isFree: true },
-  { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', provider: 'DeepSeek', context: '64K', promptPrice: '৳0.20', completionPrice: '৳0.40', latency: '0.4s', isFree: true },
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'Google', context: '1M', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.3s', isFree: true },
+  { id: 'meta-llama/llama-3.3-70b', name: 'Llama 3.3 70B', provider: 'Groq', context: '128K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.2s', isFree: true },
+  { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1', provider: 'DeepSeek', context: '64K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.5s', isFree: true },
+  { id: 'mistralai/mistral-nemo', name: 'Mistral Nemo', provider: 'Mistral', context: '128K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.3s', isFree: true },
+  { id: 'qwen/qwen-2.5-72b', name: 'Qwen 2.5 72B', provider: 'OpenRouter', context: '128K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.4s', isFree: true },
+  { id: 'microsoft/phi-3-mini-128k', name: 'Phi-3 Mini 128K', provider: 'OpenRouter', context: '128K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.2s', isFree: true },
   { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI', context: '128K', promptPrice: '৳5.00', completionPrice: '৳15.00', latency: '0.6s', isFree: false },
-  { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', context: '200K', promptPrice: '৳3.00', completionPrice: '৳15.00', latency: '0.5s', isFree: false },
-  { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI', context: '128K', promptPrice: '৳0.15', completionPrice: '৳0.60', latency: '0.3s', isFree: false },
+  { id: 'anthropic/claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic', context: '200K', promptPrice: '৳3.00', completionPrice: '৳15.00', latency: '0.5s', isFree: false },
+  { id: 'openai/o3-mini', name: 'o3-mini', provider: 'OpenAI', context: '128K', promptPrice: '৳1.10', completionPrice: '৳4.40', latency: '1.0s', isFree: false },
+  { id: 'google/gemini-2.0-pro', name: 'Gemini 2.0 Pro', provider: 'Google', context: '1M', promptPrice: '৳1.25', completionPrice: '৳5.00', latency: '0.5s', isFree: false },
+  { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', provider: 'DeepSeek', context: '64K', promptPrice: '৳0.20', completionPrice: '৳0.40', latency: '0.4s', isFree: false },
+  { id: 'cohere/command-r-plus', name: 'Command R+', provider: 'Cohere', context: '128K', promptPrice: '৳3.00', completionPrice: '৳15.00', latency: '0.6s', isFree: false },
 ]
 
 // Ticker models
 const tickerModels = [
   { name: 'GPT-4o', provider: 'OpenAI' },
-  { name: 'Claude 3.5 Sonnet', provider: 'Anthropic' },
-  { name: 'Gemini 1.5 Flash', provider: 'Google' },
-  { name: 'Llama 3 70B', provider: 'Groq' },
-  { name: 'DeepSeek V3', provider: 'DeepSeek' },
+  { name: 'Claude 4 Sonnet', provider: 'Anthropic' },
+  { name: 'Gemini 2.5 Flash', provider: 'Google' },
+  { name: 'Llama 3.3 70B', provider: 'Meta' },
+  { name: 'DeepSeek R1', provider: 'DeepSeek' },
   { name: 'Mistral Large', provider: 'Mistral' },
-  { name: 'GPT-4o Mini', provider: 'OpenAI' },
-  { name: 'Claude 3 Haiku', provider: 'Anthropic' },
-  { name: 'Gemini Pro', provider: 'Google' },
-  { name: 'Phi-3', provider: 'Microsoft' },
+  { name: 'o3-mini', provider: 'OpenAI' },
+  { name: 'Claude 3.5 Haiku', provider: 'Anthropic' },
+  { name: 'Gemini 2.0 Pro', provider: 'Google' },
+  { name: 'Qwen 2.5 72B', provider: 'Alibaba' },
+  { name: 'Command R+', provider: 'Cohere' },
+  { name: 'Phi-3 Mini', provider: 'Microsoft' },
+  { name: 'Codestral', provider: 'Mistral' },
+  { name: 'Llama 3.1 405B', provider: 'Meta' },
+  { name: 'DeepSeek V3', provider: 'DeepSeek' },
+  { name: 'Gemini 1.5 Pro', provider: 'Vertex' },
 ]
 
 // Code tabs
@@ -277,8 +369,8 @@ const features = [
   { icon: <Network size={22} />, title: 'Intelligent Routing', description: 'Auto-fallback across providers. If Claude is down, GPT-4o takes over seamlessly with zero downtime.', highlight: true },
   { icon: <Gauge size={22} />, title: 'Lowest Latency', description: 'Smart routing picks the fastest provider for each request. Sub-200ms response times with Groq acceleration.', highlight: true },
   { icon: <Lock size={22} />, title: 'Enterprise Security', description: 'SOC 2 compliant infrastructure. All traffic encrypted. API keys never stored in plaintext.', highlight: false },
-  { icon: <CreditCard size={22} />, title: 'Pay in BDT', description: 'bKash, Nagad, Rocket — no international card needed. Credits never expire. Instant top-up.', highlight: true },
-  { icon: <Code size={22} />, title: 'OpenAI Compatible', description: 'Drop-in replacement. Change your base URL and instantly access 50+ models without rewriting code.', highlight: false },
+  { icon: <CreditCard size={22} />, title: 'Local Currency Payments', description: 'bKash, Nagad, Rocket, USDT, Stripe — pay in your local currency. No international card needed. Credits never expire.', highlight: true },
+  { icon: <Code size={22} />, title: 'OpenAI Compatible', description: 'Drop-in replacement. Change your base URL and instantly access 150+ models without rewriting code.', highlight: false },
   { icon: <Users size={22} />, title: 'Team Management', description: 'Shared billing, usage analytics per member, and admin controls for production workloads.', highlight: false },
 ]
 
@@ -292,7 +384,7 @@ const trustIndicators = [
 
 // Stats for counter animation
 const stats = [
-  { value: 50, suffix: '+', label: 'AI Models', icon: <Layers size={20} /> },
+  { value: 150, suffix: '+', label: 'AI Models', icon: <Layers size={20} /> },
   { value: 999, suffix: '%', label: 'Uptime SLA', icon: <Server size={20} /> },
   { value: 100, suffix: 'ms', label: 'Avg Latency', icon: <Clock size={20} /> },
   { value: 5000, suffix: '+', label: 'Active Users', icon: <Users size={20} /> },
@@ -363,7 +455,7 @@ export default function Home() {
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="hidden md:flex relative">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input type="text" placeholder="Search 50+ models..." className="bg-[#0d1117] border border-gray-800 rounded-full py-2 pl-10 pr-4 text-xs focus:outline-none focus:border-[#ff6b4a] w-64 transition-all placeholder:text-gray-600" />
+              <input type="text" placeholder="Search 150+ models..." className="bg-[#0d1117] border border-gray-800 rounded-full py-2 pl-10 pr-4 text-xs focus:outline-none focus:border-[#ff6b4a] w-64 transition-all placeholder:text-gray-600" />
             </div>
             <div className="hidden sm:flex items-center gap-4 text-sm font-semibold">
               <Link href="/login" className="hover:text-white transition-colors">Log In</Link>
@@ -426,21 +518,21 @@ export default function Home() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]"></span>
               </span>
-              <span className="text-xs text-[#ff6b4a] tracking-wide font-mono uppercase font-medium">Bangladesh's First AI Gateway</span>
+              <span className="text-xs text-[#ff6b4a] tracking-wide font-mono uppercase font-medium">Asia's First AI Gateway — Local Currency Support</span>
             </motion.div>
 
             {/* Headline */}
             <motion.h1 variants={staggerItemVariants} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-fraunces font-black leading-[1.05] mb-6 text-white tracking-tight">
               One API.{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff8a6a] via-[#ff6b4a] to-[#c8381a]">50+ Models.</span>{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff8a6a] via-[#ff6b4a] to-[#c8381a]">150+ Models.</span>{' '}
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-300">Pay in BDT.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-300">Your Currency.</span>
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p variants={staggerItemVariants} className="text-base sm:text-lg text-gray-400 max-w-xl leading-relaxed mb-8 sm:mb-10 mx-auto lg:mx-0">
-              Access GPT-4o, Claude 3.5, Gemini 1.5, Llama 3, and 50+ more models through one standardized API. 
-              <span className="text-[#ff6b4a] font-semibold"> Find the lowest prices, best latency.</span>
+              Access GPT-4o, Claude, Gemini, Llama, DeepSeek, and 150+ more models through one standardized API.
+              <span className="text-[#ff6b4a] font-semibold"> Pay with bKash, Nagad, Rocket, USDT, or card — your local currency, always.</span>
             </motion.p>
 
             {/* CTA Buttons */}
@@ -458,7 +550,7 @@ export default function Home() {
             <motion.div variants={staggerItemVariants} className="flex flex-wrap items-center gap-6 text-sm text-gray-500 justify-center lg:justify-start">
               <div className="flex items-center gap-2"><Zap size={14} className="text-yellow-500" /> Sub-100ms Latency</div>
               <div className="flex items-center gap-2"><ShieldCheck size={14} className="text-green-500" /> OpenAI Compatible</div>
-              <div className="flex items-center gap-2"><Globe size={14} className="text-blue-400" /> 50+ Models</div>
+              <div className="flex items-center gap-2"><Globe size={14} className="text-blue-400" /> 150+ Models</div>
             </motion.div>
           </motion.div>
 
@@ -539,7 +631,7 @@ export default function Home() {
                 Provider Network
               </span>
               <h2 className="text-3xl md:text-5xl font-fraunces font-black text-white mb-4">
-                Trusted by <span className="text-[#ff6b4a]">60+ Providers</span>
+                <span className="text-[#ff6b4a]">12+ Providers.</span> 150+ Models
               </h2>
               <p className="text-gray-500 max-w-xl mx-auto font-mono text-sm">
                 Access models from the world's leading AI companies through a single unified API.
@@ -549,7 +641,7 @@ export default function Home() {
 
           {/* Provider Filter */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {['all', 'openai', 'anthropic', 'google', 'deepseek', 'groq', 'mistral'].map((filter) => (
+            {['all', 'openai', 'anthropic', 'google', 'deepseek', 'groq', 'mistral', 'meta', 'openrouter'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveProvider(filter)}
@@ -656,7 +748,7 @@ export default function Home() {
           {/* View All Models CTA */}
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-10 text-center">
             <Link href="/models" className="inline-flex items-center gap-2 bg-[#0a0a0f] border border-gray-800 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:border-[#ff6b4a]/50 hover:bg-[#ff6b4a]/5 transition-all group">
-              Browse all 50+ models
+              Browse all 150+ models
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
@@ -741,7 +833,7 @@ export default function Home() {
 
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-8 text-center">
             <Link href="/models" className="inline-flex items-center gap-2 text-[#ff6b4a] hover:text-[#ff8a6a] text-sm font-semibold transition-colors group">
-              View all 50+ models 
+              View all 150+ models
               <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
