@@ -405,7 +405,7 @@ export default function LoginPage() {
               SOVEREIGN INTELLIGENCE ACCESS
             </p>
             <p className="font-body text-body-sm text-[#948e9c] max-w-xs">
-              50+ AI models. One API key. Pay in BDT.
+              150+ AI models. One API key. Pay in your local currency.
             </p>
           </div>
         </div>

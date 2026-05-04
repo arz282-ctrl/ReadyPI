@@ -1,15 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {
-  Search, Terminal, BookOpen, Key, Activity, Zap, Layers, Network, ShieldCheck,
-  ChevronRight, Globe, CreditCard, Code, ArrowRight, Lock, Gauge, Users, Menu, X,
+  Terminal, Key, Zap, Layers, Network, ShieldCheck,
+  ChevronRight, Globe, CreditCard, Code, ArrowRight, Lock, Gauge, Users,
   Rocket, Server, Clock, Star, Shield, Headphones,
   Twitter, Github, Linkedin, MessageCircle, BarChart3
 } from 'lucide-react'
 import PiMark from '@/components/PiMark'
+import Navbar from '@/components/Navbar'
 import { StatCard } from '@/components/ui/animated-counter'
 import { RevealOnScroll, staggerItemVariants } from '@/components/ui/motion-primitives'
 
@@ -405,7 +406,6 @@ const testimonials = [
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeCodeTab, setActiveCodeTab] = useState(0)
   const [activeProvider, setActiveProvider] = useState<string>('all')
   
@@ -415,59 +415,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0f] text-gray-300 overflow-hidden">
-      {/* ── Navigation ── */}
-      <nav className="sticky top-0 z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-gray-800/50 px-4 sm:px-6 py-3 sm:py-4">
-        <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center" aria-label="ReadyPi home">
-              <PiMark variant="logo" withWordmark />
-            </Link>
-            <div className="hidden lg:flex items-center gap-6 text-sm">
-              <Link href="/models" className="flex items-center gap-2 hover:text-white transition-colors"><Layers size={16} /> Models</Link>
-              <Link href="/playground" className="flex items-center gap-2 hover:text-white transition-colors"><Terminal size={16} /> Chat</Link>
-              <Link href="/docs" className="flex items-center gap-2 hover:text-white transition-colors"><BookOpen size={16} /> Docs</Link>
-              <Link href="/pricing" className="flex items-center gap-2 hover:text-white transition-colors"><CreditCard size={16} /> Pricing</Link>
-              <Link href="/dashboard" className="flex items-center gap-2 hover:text-white transition-colors"><Activity size={16} /> Dashboard</Link>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 sm:gap-6">
-            <div className="hidden md:flex relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input type="text" placeholder="Search 150+ models..." className="bg-[#0d1117] border border-gray-800 rounded-full py-2 pl-10 pr-4 text-xs focus:outline-none focus:border-[#ff6b4a] w-64 transition-all placeholder:text-gray-600" />
-            </div>
-            <div className="hidden sm:flex items-center gap-4 text-sm font-semibold">
-              <Link href="/login" className="hover:text-white transition-colors">Log In</Link>
-              <Link href="/signup" className="bg-[#ff6b4a] text-white px-5 py-2.5 rounded-full hover:bg-[#ff5a3a] transition-all hover:shadow-[0_0_25px_rgba(255,107,74,0.4)]">Get Started</Link>
-            </div>
-            <button className="lg:hidden text-gray-400 hover:text-white p-1" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-          </div>
-        </div>
-        
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }} 
-              animate={{ opacity: 1, height: 'auto' }} 
-              exit={{ opacity: 0, height: 0 }} 
-              transition={{ duration: 0.3 }}
-              className="lg:hidden overflow-hidden border-t border-gray-800 mt-3"
-            >
-              <div className="flex flex-col gap-3 py-4">
-                {[{href:'/models',icon:<Layers size={16}/>,label:'Models'},{href:'/playground',icon:<Terminal size={16}/>,label:'Chat'},{href:'/docs',icon:<BookOpen size={16}/>,label:'Docs'},{href:'/pricing',icon:<CreditCard size={16}/>,label:'Pricing'},{href:'/dashboard',icon:<Activity size={16}/>,label:'Dashboard'}].map(l=>(
-                  <Link key={l.href} href={l.href} className="flex items-center gap-3 text-sm text-gray-400 hover:text-white py-1.5" onClick={()=>setMobileMenuOpen(false)}>{l.icon}{l.label}</Link>
-                ))}
-                <div className="flex items-center gap-3 pt-3 border-t border-gray-800">
-                  <Link href="/login" className="text-sm text-gray-400 hover:text-white" onClick={()=>setMobileMenuOpen(false)}>Log In</Link>
-                  <Link href="/signup" className="bg-[#ff6b4a] text-white px-5 py-2 rounded-full text-sm font-semibold" onClick={()=>setMobileMenuOpen(false)}>Get Started</Link>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+      {/* ── Navigation (auth-aware) ── */}
+      <Navbar />
 
       {/* ── HERO SECTION ── */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-8 sm:pt-0">
@@ -853,7 +802,7 @@ export default function Home() {
                 Built for <span className="text-[#ff6b4a]">Production</span>
               </h2>
               <p className="text-gray-500 max-w-xl mx-auto font-mono text-sm">
-                Enterprise-grade infrastructure powering AI applications across Bangladesh and beyond.
+                Enterprise-grade infrastructure powering AI applications across Asia and beyond.
               </p>
             </div>
           </RevealOnScroll>

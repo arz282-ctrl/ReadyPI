@@ -43,7 +43,7 @@ export default function ModelsPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
           <div>
             <h1 className="text-4xl font-fraunces font-black text-white mb-2 tracking-tight">AI Models</h1>
-            <p className="text-gray-500 text-sm">Compare 50+ language models, context limits, and pricing in BDT.</p>
+            <p className="text-gray-500 text-sm">Compare 150+ language models, context limits, and pricing.</p>
           </div>
           
           <div className="flex items-center gap-4 w-full md:w-auto">
