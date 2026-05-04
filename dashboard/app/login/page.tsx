@@ -3,17 +3,16 @@
 /**
  * ReadyPI Login — Sovereign Intelligence Access Gateway
  *
- * Pixel-perfect implementation of the authentication_precision_elite design.
- * Split-panel layout: left form panel (white), right brand visual (dark).
- * Uses the elite design system with Space Grotesk technical labels,
- * Noto Serif headlines, and #FF4500 accent color.
+ * Animated authentication with BoxReveal effects on left panel.
+ * Right panel (Pi Mark) remains unchanged.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { Eye, EyeOff, ArrowRight, Loader2, Phone, Smartphone } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
+import { BoxReveal, Input, Label } from '@/components/ui/modern-animated-sign-in';
 import PiMark from '@/components/PiMark';
 
 export default function LoginPage() {
@@ -24,12 +23,6 @@ export default function LoginPage() {
   const [passphrase, setPassphrase] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState('');
-
-  // Phone Auth State
-  const [usePhoneAuth, setUsePhoneAuth] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,44 +39,9 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Authentication failed';
-      // Error is set in the auth context, but also capture locally for display
       if (!error) setLocalError(message);
     }
   }, [identifier, passphrase, loginWithEmail, router, clearError, error]);
-
-  const handlePhoneSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
-    setLocalError('');
-
-    if (!confirmationResult) {
-      // Send Code
-      if (!phoneNumber.trim()) {
-        setLocalError('Phone number is required.');
-        return;
-      }
-      try {
-        const result = await sendPhoneCode(phoneNumber, 'recaptcha-container');
-        setConfirmationResult(result);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Failed to send code';
-        if (!error) setLocalError(message);
-      }
-    } else {
-      // Verify Code
-      if (!verificationCode.trim()) {
-        setLocalError('Verification code is required.');
-        return;
-      }
-      try {
-        await verifyPhoneCode(confirmationResult, verificationCode);
-        router.push('/dashboard');
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Failed to verify code';
-        if (!error) setLocalError(message);
-      }
-    }
-  }, [phoneNumber, verificationCode, confirmationResult, sendPhoneCode, verifyPhoneCode, router, clearError, error]);
 
   const handleOAuth = useCallback(async (provider: 'google' | 'github' | 'facebook' | 'apple') => {
     clearError();
@@ -120,59 +78,57 @@ export default function LoginPage() {
       >
         {/* Mobile Brand Identity (hidden on desktop where right panel shows it) */}
         <div className="md:hidden mb-6">
-          <h1 className="font-headline text-headline-md font-bold tracking-tight uppercase text-[#0A0A0A]">
-            Sovereign Intelligence
-          </h1>
+          <BoxReveal boxColor="#FF4500" duration={0.3}>
+            <h1 className="font-headline text-headline-md font-bold tracking-tight uppercase text-[#0A0A0A]">
+              Sovereign Intelligence
+            </h1>
+          </BoxReveal>
         </div>
 
         <div className="w-full max-w-md mx-auto py-8">
           {/* ── Header ── */}
-          <header className="mb-6 border-b border-[#262626] pb-4 flex justify-between items-end">
-            <div>
+          <header className="mb-6 border-b border-[#262626] pb-4">
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
               <h2
                 id="auth-heading"
                 className="font-headline text-headline-lg text-[#0A0A0A]"
               >
                 ACCESS GATEWAY
               </h2>
+            </BoxReveal>
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
               <p className="font-body text-body-sm text-[#494551] mt-2">
                 Identify yourself to proceed.
               </p>
-            </div>
-            <button 
-              onClick={() => {
-                setUsePhoneAuth(!usePhoneAuth);
-                clearError();
-                setLocalError('');
-              }}
-              className="text-xs font-technical text-[#FF4500] hover:underline"
-            >
-              {usePhoneAuth ? 'USE EMAIL' : 'USE PHONE'}
-            </button>
+            </BoxReveal>
           </header>
 
           {/* ── Error Display ── */}
           {displayError && (
-            <div
-              id="auth-error-banner"
-              className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700 font-technical text-data-mono"
-              role="alert"
-            >
-              {displayError}
-            </div>
+            <BoxReveal boxColor="#FF4500" duration={0.3} className="mb-6">
+              <div
+                id="auth-error-banner"
+                className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700 font-technical text-data-mono"
+                role="alert"
+              >
+                {displayError}
+              </div>
+            </BoxReveal>
           )}
 
-          {/* ── Login Form ── */}
-          {!usePhoneAuth ? (
-            <form onSubmit={handleSubmit} className="space-y-6" autoComplete="on">
-              {/* Identifier (Email) Field */}
-              <div className="relative group">
-                <label
+          {/* ── Animated Login Form ── */}
+          <form onSubmit={handleSubmit} className="space-y-6" autoComplete="on">
+            {/* Identifier (Email) Field */}
+            <div className="relative group">
+              <BoxReveal boxColor="#FF4500" duration={0.3}>
+                <Label
                   htmlFor="identifier"
                   className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
                 >
                   IDENTIFIER [EMAIL / ID]
-                </label>
+                </Label>
+              </BoxReveal>
+              <BoxReveal boxColor="#FF4500" duration={0.3} width="100%">
                 <input
                   id="identifier"
                   name="email"
@@ -184,16 +140,20 @@ export default function LoginPage() {
                   disabled={loading}
                   className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-              </div>
+              </BoxReveal>
+            </div>
 
-              {/* Passphrase Field */}
-              <div className="relative group">
-                <label
+            {/* Passphrase Field */}
+            <div className="relative group">
+              <BoxReveal boxColor="#FF4500" duration={0.3}>
+                <Label
                   htmlFor="passphrase"
                   className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
                 >
                   PASSPHRASE
-                </label>
+                </Label>
+              </BoxReveal>
+              <BoxReveal boxColor="#FF4500" duration={0.3} width="100%">
                 <div className="relative">
                   <input
                     id="passphrase"
@@ -216,9 +176,11 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-              </div>
+              </BoxReveal>
+            </div>
 
-              {/* Primary Action Button */}
+            {/* Primary Action Button */}
+            <BoxReveal boxColor="#FF4500" duration={0.3} width="100%" overflow="visible">
               <div className="pt-2">
                 <button
                   id="auth-submit-btn"
@@ -239,77 +201,18 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-            </form>
-          ) : (
-            <form onSubmit={handlePhoneSubmit} className="space-y-6">
-              {!confirmationResult ? (
-                <div className="relative group">
-                  <label
-                    htmlFor="phone"
-                    className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
-                  >
-                    PHONE NUMBER
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+1 234 567 8900"
-                    disabled={loading}
-                    className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
-                </div>
-              ) : (
-                <div className="relative group">
-                  <label
-                    htmlFor="code"
-                    className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
-                  >
-                    VERIFICATION CODE
-                  </label>
-                  <input
-                    id="code"
-                    type="text"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    placeholder="123456"
-                    disabled={loading}
-                    className="input-elite disabled:opacity-50 disabled:cursor-not-allowed text-center tracking-widest text-lg"
-                  />
-                </div>
-              )}
-              
-              <div id="recaptcha-container"></div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#FF4500] text-white font-technical text-technical-label py-4 px-6 uppercase tracking-widest border border-[#FF4500] hover:bg-[#D93B00] transition-colors duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      PROCESSING...
-                    </>
-                  ) : (
-                    <>
-                      {!confirmationResult ? 'SEND CODE' : 'VERIFY CODE'}
-                      <ArrowRight size={16} />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
+            </BoxReveal>
+          </form>
 
           {/* ── OAuth Providers ── */}
           <div className="mt-10 flex flex-col gap-4 border-t border-[#262626] pt-6">
-            <p className="font-technical text-technical-label text-[#494551] uppercase text-center">
-              OR AUTHENTICATE VIA
-            </p>
-            <div className="grid grid-cols-2 gap-2">
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
+              <p className="font-technical text-technical-label text-[#494551] uppercase text-center">
+                OR AUTHENTICATE VIA
+              </p>
+            </BoxReveal>
+            <BoxReveal boxColor="#FF4500" duration={0.3} width="100%">
+              <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleOAuth('google')}
                 disabled={loading}
@@ -350,26 +253,31 @@ export default function LoginPage() {
                 </svg>
                 <span className="truncate">APPLE</span>
               </button>
-            </div>
+              </div>
+            </BoxReveal>
           </div>
 
           {/* ── Recovery & Signup Links ── */}
           <div className="mt-6 flex flex-col items-center gap-3 pb-8">
-            <Link
-              href="#"
-              className="font-technical text-data-mono text-[#494551] hover:text-[#FF4500] transition-colors duration-150 underline decoration-1 underline-offset-4"
-            >
-              RECOVER ACCESS CREDENTIALS
-            </Link>
-            <p className="font-body text-body-sm text-[#494551]">
-              No account?{' '}
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
               <Link
-                href="/signup"
-                className="text-[#FF4500] hover:text-[#D93B00] font-medium underline decoration-1 underline-offset-4"
+                href="#"
+                className="font-technical text-data-mono text-[#494551] hover:text-[#FF4500] transition-colors duration-150 underline decoration-1 underline-offset-4"
               >
-                REQUEST ACCESS
+                RECOVER ACCESS CREDENTIALS
               </Link>
-            </p>
+            </BoxReveal>
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
+              <p className="font-body text-body-sm text-[#494551]">
+                No account?{' '}
+                <Link
+                  href="/signup"
+                  className="text-[#FF4500] hover:text-[#D93B00] font-medium underline decoration-1 underline-offset-4"
+                >
+                  REQUEST ACCESS
+                </Link>
+              </p>
+            </BoxReveal>
           </div>
         </div>
       </section>

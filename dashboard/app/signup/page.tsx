@@ -3,9 +3,8 @@
 /**
  * ReadyPI Signup — Request Access to Sovereign Intelligence
  *
- * Matches the authentication_precision_elite design system.
- * Same split-panel layout as login, with additional full_name field
- * and a welcome credits callout.
+ * Animated authentication with BoxReveal effects on left panel.
+ * Right panel (Pi Mark) remains unchanged.
  */
 
 import { useState, useCallback } from 'react';
@@ -13,6 +12,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { BoxReveal, Label } from '@/components/ui/modern-animated-sign-in';
 import PiMark from '@/components/PiMark';
 
 export default function SignupPage() {
@@ -121,149 +121,176 @@ export default function SignupPage() {
       >
         {/* Mobile Brand Identity */}
         <div className="md:hidden mb-6">
-          <h1 className="font-headline text-headline-md font-bold tracking-tight uppercase text-[#0A0A0A]">
-            Sovereign Intelligence
-          </h1>
+          <BoxReveal boxColor="#FF4500" duration={0.3}>
+            <h1 className="font-headline text-headline-md font-bold tracking-tight uppercase text-[#0A0A0A]">
+              Sovereign Intelligence
+            </h1>
+          </BoxReveal>
         </div>
 
         <div className="w-full max-w-md mx-auto">
           {/* ── Header ── */}
           <header className="mb-6 border-b border-[#262626] pb-4">
-            <h2
-              id="signup-heading"
-              className="font-headline text-headline-lg text-[#0A0A0A]"
-            >
-              REQUEST ACCESS
-            </h2>
-            <p className="font-body text-body-sm text-[#494551] mt-2">
-              Create your gateway credentials.
-            </p>
-            <div className="mt-3 flex items-center gap-2 font-technical text-technical-label">
-              <Sparkles size={14} className="text-[#FF4500]" />
-              <span className="text-[#FF4500]">50 FREE CREDITS</span>
-              <span className="text-[#948e9c]">— NO CARD REQUIRED</span>
-            </div>
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
+              <h2
+                id="signup-heading"
+                className="font-headline text-headline-lg text-[#0A0A0A]"
+              >
+                REQUEST ACCESS
+              </h2>
+            </BoxReveal>
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
+              <p className="font-body text-body-sm text-[#494551] mt-2">
+                Create your gateway credentials.
+              </p>
+            </BoxReveal>
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
+              <div className="mt-3 flex items-center gap-2 font-technical text-technical-label">
+                <Sparkles size={14} className="text-[#FF4500]" />
+                <span className="text-[#FF4500]">50 FREE CREDITS</span>
+                <span className="text-[#948e9c]">— NO CARD REQUIRED</span>
+              </div>
+            </BoxReveal>
           </header>
 
           {/* ── Error Display ── */}
           {displayError && (
-            <div
-              id="signup-error-banner"
-              className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700 font-technical text-data-mono"
-              role="alert"
-            >
-              {displayError}
-            </div>
+            <BoxReveal boxColor="#FF4500" duration={0.3} className="mb-6">
+              <div
+                id="signup-error-banner"
+                className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700 font-technical text-data-mono"
+                role="alert"
+              >
+                {displayError}
+              </div>
+            </BoxReveal>
           )}
 
           {/* ── Signup Form ── */}
           <form onSubmit={handleSubmit} className="space-y-5" autoComplete="on">
             {/* Full Name Field */}
             <div className="relative group">
-              <label
-                htmlFor="full-name"
-                className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
-              >
-                DESIGNATION [FULL NAME]
-              </label>
-              <input
-                id="full-name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Ahmed Riyaz"
-                disabled={loading}
-                className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+              <BoxReveal boxColor="#FF4500" duration={0.3}>
+                <Label
+                  htmlFor="full-name"
+                  className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
+                >
+                  DESIGNATION [FULL NAME]
+                </Label>
+              </BoxReveal>
+              <BoxReveal boxColor="#FF4500" duration={0.3} width="100%">
+                <input
+                  id="full-name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Ahmed Riyaz"
+                  disabled={loading}
+                  className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </BoxReveal>
             </div>
 
             {/* Email Field */}
             <div className="relative group">
-              <label
-                htmlFor="signup-identifier"
-                className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
-              >
-                IDENTIFIER [EMAIL]
-              </label>
-              <input
-                id="signup-identifier"
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="user@domain.ext"
-                required
-                disabled={loading}
-                className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+              <BoxReveal boxColor="#FF4500" duration={0.3}>
+                <Label
+                  htmlFor="signup-identifier"
+                  className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
+                >
+                  IDENTIFIER [EMAIL]
+                </Label>
+              </BoxReveal>
+              <BoxReveal boxColor="#FF4500" duration={0.3} width="100%">
+                <input
+                  id="signup-identifier"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="user@domain.ext"
+                  required
+                  disabled={loading}
+                  className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </BoxReveal>
             </div>
 
             {/* Passphrase Field */}
             <div className="relative group">
-              <label
-                htmlFor="signup-passphrase"
-                className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
-              >
-                PASSPHRASE [MIN 8 CHARS]
-              </label>
-              <div className="relative">
-                <input
-                  id="signup-passphrase"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  value={passphrase}
-                  onChange={(e) => setPassphrase(e.target.value)}
-                  placeholder="••••••••••••"
-                  minLength={8}
-                  required
-                  disabled={loading}
-                  className="input-elite pr-12 disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#494551] hover:text-[#0A0A0A] transition-colors"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  tabIndex={-1}
+              <BoxReveal boxColor="#FF4500" duration={0.3}>
+                <Label
+                  htmlFor="signup-passphrase"
+                  className="font-technical text-technical-label text-[#494551] block mb-1 group-focus-within:text-[#FF4500] transition-colors duration-150 uppercase tracking-widest"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+                  PASSPHRASE [MIN 8 CHARS]
+                </Label>
+              </BoxReveal>
+              <BoxReveal boxColor="#FF4500" duration={0.3} width="100%">
+                <div className="relative">
+                  <input
+                    id="signup-passphrase"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    value={passphrase}
+                    onChange={(e) => setPassphrase(e.target.value)}
+                    placeholder="••••••••••••"
+                    minLength={8}
+                    required
+                    disabled={loading}
+                    className="input-elite pr-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#494551] hover:text-[#0A0A0A] transition-colors"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </BoxReveal>
             </div>
 
             {/* Submit Button */}
-            <div className="pt-2">
-              <button
-                id="signup-submit-btn"
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#FF4500] text-white font-technical text-technical-label py-4 px-6 uppercase tracking-widest border border-[#FF4500] hover:bg-[#D93B00] transition-colors duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    CREATING CREDENTIALS...
-                  </>
-                ) : (
-                  <>
-                    INITIALIZE ACCOUNT
-                    <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-            </div>
+            <BoxReveal boxColor="#FF4500" duration={0.3} width="100%" overflow="visible">
+              <div className="pt-2">
+                <button
+                  id="signup-submit-btn"
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#FF4500] text-white font-technical text-technical-label py-4 px-6 uppercase tracking-widest border border-[#FF4500] hover:bg-[#D93B00] transition-colors duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      CREATING CREDENTIALS...
+                    </>
+                  ) : (
+                    <>
+                      INITIALIZE ACCOUNT
+                      <ArrowRight size={16} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </BoxReveal>
           </form>
 
           {/* ── OAuth Providers ── */}
           <div className="mt-8 flex flex-col gap-4 border-t border-[#262626] pt-6">
-            <p className="font-technical text-technical-label text-[#494551] uppercase text-center">
-              OR AUTHENTICATE VIA
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <BoxReveal boxColor="#FF4500" duration={0.3}>
+              <p className="font-technical text-technical-label text-[#494551] uppercase text-center">
+                OR AUTHENTICATE VIA
+              </p>
+            </BoxReveal>
+            <BoxReveal boxColor="#FF4500" duration={0.3} width="100%">
+              <div className="flex flex-col sm:flex-row gap-2">
               <button
                 id="signup-google-btn"
                 onClick={handleGoogleOAuth}
@@ -286,21 +313,24 @@ export default function SignupPage() {
                 </svg>
                 OAUTH GITHUB
               </button>
-            </div>
+              </div>
+            </BoxReveal>
           </div>
 
           {/* ── Login Link ── */}
-          <div className="mt-6 text-center">
-            <p className="font-body text-body-sm text-[#494551]">
-              Already have credentials?{' '}
-              <Link
-                href="/login"
-                className="text-[#FF4500] hover:text-[#D93B00] font-medium underline decoration-1 underline-offset-4"
-              >
-                ACCESS GATEWAY
-              </Link>
-            </p>
-          </div>
+          <BoxReveal boxColor="#FF4500" duration={0.3}>
+            <div className="mt-6 text-center">
+              <p className="font-body text-body-sm text-[#494551]">
+                Already have credentials?{' '}
+                <Link
+                  href="/login"
+                  className="text-[#FF4500] hover:text-[#D93B00] font-medium underline decoration-1 underline-offset-4"
+                >
+                  ACCESS GATEWAY
+                </Link>
+              </p>
+            </div>
+          </BoxReveal>
         </div>
       </section>
 

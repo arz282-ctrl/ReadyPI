@@ -12,7 +12,7 @@ import {
 import PiMark from '@/components/PiMark'
 import Navbar from '@/components/Navbar'
 import { StatCard } from '@/components/ui/animated-counter'
-import { RevealOnScroll, staggerItemVariants } from '@/components/ui/motion-primitives'
+import { GlowingOrb, RevealOnScroll, FloatingElement, staggerItemVariants } from '@/components/ui/motion-primitives'
 
 // Provider data - OpenRouter-style model showcase
 const providers = [
@@ -420,10 +420,10 @@ export default function Home() {
 
       {/* ── HERO SECTION ── */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-8 sm:pt-0">
-        {/* Ambient orbs — static, no JS animation */}
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-3xl pointer-events-none opacity-30" style={{ background: 'radial-gradient(circle, rgba(255,107,74,0.2) 0%, transparent 70%)' }} />
-        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full blur-3xl pointer-events-none opacity-30" style={{ background: 'radial-gradient(circle, rgba(200,56,26,0.2) 0%, transparent 70%)' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-20 hidden sm:block" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.15) 0%, transparent 70%)' }} />
+        {/* Ambient orbs */}
+        <GlowingOrb className="-top-40 -left-40" color="#ff6b4a" size={600} />
+        <GlowingOrb className="-bottom-40 -right-40" color="#c8381a" size={500} />
+        <GlowingOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" color="#00ff88" size={300} />
 
         {/* Animated grid background */}
         <div className="absolute inset-0 opacity-[0.04]" style={{ 
@@ -488,13 +488,15 @@ export default function Home() {
             transition={{ duration: 1.2, delay: 0.3 }}
             className="hidden lg:flex flex-1 items-center justify-center"
           >
-            <PiMark
-              variant="hero"
-              size={420}
-              showEyes={true}
-              showOrbit={true}
-              showLabels={true}
-            />
+            <FloatingElement duration={6} distance={20}>
+              <PiMark
+                variant="hero"
+                size={420}
+                showEyes={true}
+                showOrbit={true}
+                showLabels={true}
+              />
+            </FloatingElement>
           </motion.div>
         </div>
 

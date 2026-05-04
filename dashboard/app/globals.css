@@ -20,6 +20,15 @@
   --surface-container: #211f24;
   --on-surface: #e6e0e9;
   --outline-variant: #494551;
+  
+  /* Modern animated sign-in variables */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 0%);
+  --skeleton: hsl(0, 0%, 90%);
+  --border: hsl(220, 20%, 90%);
+  --btn-border: hsl(214deg, 31.8%, 91.4%);
+  --input: hsl(220, 20%, 90%);
+  --radius: 0.5rem;
 }
 
 * {
@@ -297,6 +306,21 @@ a:hover {
 .bg-dark { background: var(--dark-bg); }
 .bg-dark-surface { background: var(--dark-surface); }
 .border-dark { border-color: var(--dark-border); }
+
+/* Modern animated sign-in button */
+.g-button {
+  @apply rounded-[var(--radius)] border;
+  border-color: var(--btn-border);
+}
+
+.dark {
+  --background: hsl(222, 94%, 5%);
+  --foreground: hsl(0, 0%, 100%);
+  --skeleton: hsl(218, 36%, 16%);
+  --border: hsl(220, 20%, 90%);
+  --btn-border: hsl(217deg, 32.6%, 17.5%);
+  --input: hsl(219, 63%, 16%);
+}
 
 /* ── Material Symbols ────────────────────────────────────────────────────── */
 
