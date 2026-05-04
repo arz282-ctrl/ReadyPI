@@ -54,3 +54,26 @@ temp/
 
 # Documentation builds
 docs/_build/
+
+# GCloud config dirs (accidentally committed)
+.gcloud-config/
+.gcloud_config/
+
+# Obsidian editor config
+.obsidian/
+.obsidianignore
+
+# Local env files (never track)
+dashboard/.env.development.local
+dashboard/.env*.local
+
+# Skills lockfile
+skills-lock.json
+
+# Large binary / media files
+*.mov
+*.zip
+*.pptx
+*.pdf
+ReadyPI Complete UI:Ux.zip
+ReadyPI Complete Ui:Ux/

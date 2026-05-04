@@ -128,7 +128,7 @@ export default function PiMark({
     { text: "GPT-4o", delay: 0.5, top: "18%", right: "5%" },
     { text: "৳499", delay: 1, bottom: "20%", left: "2%" },
     { text: "bKash", delay: 1.5, bottom: "12%", right: "8%" },
-    { text: "50+", delay: 2, top: "35%", left: "-2%" },
+    { text: "150+", delay: 2, top: "35%", left: "-2%" },
     { text: "BD", delay: 2.5, top: "55%", right: "0%" },
   ];
 

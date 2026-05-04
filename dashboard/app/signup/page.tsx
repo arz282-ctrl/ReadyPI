@@ -335,7 +335,7 @@ export default function SignupPage() {
               GATEWAY REGISTRATION
             </p>
             <p className="font-body text-body-sm text-[#948e9c] max-w-xs">
-              Bangladesh&apos;s first AI API aggregation platform.
+              Asia&apos;s first AI API gateway. Local currency support.
             </p>
           </div>
         </div>

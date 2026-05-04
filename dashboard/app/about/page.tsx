@@ -22,7 +22,7 @@ export default function AboutPage() {
           heading: 'What ReadyPi does',
           body: (
             <>
-              <p>One API key gives you 50+ models across every major provider. We normalize errors, expose a single billing surface, route around outages, and price everything in BDT per million tokens at the prevailing rate.</p>
+              <p>One API key gives you 150+ models across every major provider. We normalize errors, expose a single billing surface, route around outages, and price everything per million tokens at the prevailing rate.</p>
               <p>Top up with bKash, Nagad, Rocket, card, or USDT. Credits never expire. Switch models with a string change.</p>
             </>
           ),

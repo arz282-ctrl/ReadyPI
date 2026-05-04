@@ -6,6 +6,7 @@ const { authRateLimiter } = require('../middleware/rateLimit');
 const { verifyJWT } = require('../middleware/auth');
 const db = require('../utils/db');
 const logger = require('../utils/logger');
+const emailService = require('../utils/email');
 
 /**
  * POST /auth/signup

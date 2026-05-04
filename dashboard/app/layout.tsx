@@ -3,12 +3,12 @@ import type { Metadata } from 'next'
 import { AuthProvider } from '@/lib/auth-context'
 
 export const metadata: Metadata = {
-  title: 'ReadyPi — Bangladesh\'s First AI API Gateway | Gemini, GPT-4, Llama',
-  description: 'Access 50+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment. One API key. Pay in BDT. The smartest AI aggregator in Bangladesh.',
+  title: 'ReadyPi — Asia\'s First AI API Gateway | Gemini, GPT-4, Llama',
+  description: 'Access 150+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment. One API key. Pay in BDT. Asia\'s largest AI gateway with local currency support.',
   keywords: 'AI API, Bangladesh, bKash, Nagad, OpenAI, Claude, Gemini, GPT-4, OpenRouter, DeepSeek, Llama, Developer Tools',
   openGraph: {
-    title: 'ReadyPi — Bangladesh\'s First AI API Gateway',
-    description: 'Access 50+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment.',
+    title: 'ReadyPi — Asia\'s First AI API Gateway',
+    description: 'Access 150+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment.',
     url: 'https://readypi.io',
     siteName: 'ReadyPi',
     locale: 'en_US',
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ReadyPi — Bangladesh\'s First AI API Gateway',
-    description: 'Access 50+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment.',
+    title: 'ReadyPi — Asia\'s First AI API Gateway',
+    description: 'Access 150+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment.',
   },
   robots: {
     index: true,

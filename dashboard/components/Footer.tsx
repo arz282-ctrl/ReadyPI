@@ -10,7 +10,7 @@ export default function Footer() {
             <div className="mb-4">
               <PiMark variant="logo" withWordmark />
             </div>
-            <p className="text-sm text-gray-500 leading-relaxed mb-4">Bangladesh's first AI API aggregation platform. One key. 50+ models. Pay in BDT.</p>
+            <p className="text-sm text-gray-500 leading-relaxed mb-4">Asia's first AI API gateway. One key. 150+ models. Pay in your local currency.</p>
             <div className="font-mono text-[10px] text-[#ff6b4a]">readypi.io</div>
           </div>
           {[
