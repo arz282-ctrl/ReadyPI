@@ -191,20 +191,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = useCallback(async () => {
     patch({ loading: true, error: null });
+    console.log('[OAuth] Attempting Google login...');
     try {
       const credential = await signInWithPopup(auth, googleProvider);
+      console.log('[OAuth] Google credential received:', credential.user?.uid);
       await exchangeToken(credential.user);
+      console.log('[OAuth] Google login successful');
     } catch (err: unknown) {
       let message = 'Google login failed';
       let errorCode = '';
       if (err instanceof Error) {
-        // Firebase auth errors have code property
         errorCode = (err as any).code || '';
-        // Provide more specific error messages for common OAuth issues
         if (errorCode.includes('popup-closed') || err.message.includes('popup-closed')) {
           message = 'Google sign-in was cancelled';
         } else if (errorCode.includes('unauthorized-domain')) {
-          message = 'This domain is not authorized for OAuth. Contact support to add it to Firebase authorized domains.';
+          message = 'This domain is not authorized for OAuth. Please add it to Firebase Console > Authentication > Settings > Authorized domains.';
         } else if (errorCode.includes('invalid-oauth')) {
           message = 'Google OAuth is not properly configured in Firebase Console.';
         } else if (err.message.includes('network')) {
