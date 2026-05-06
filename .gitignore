@@ -83,6 +83,27 @@ skills-lock.json
 # Agent directories
 .agents/
 .pi/
+.claude/
+
+# Skills/worktree directories
+skills/
+
+# Generated dataconnect code (regenerate as needed)
+src/dataconnect-generated/
+
+# Preview files
+*.html
+
+# Deployment scripts (one-time use)
+fix-*.sh
+get-*.sh
+setup-*.sh
+start-*.sh
+lambda-*.js
+*-local.sh
+
+# Build configs
+cloudbuild.yaml
 
 # Embedded git repositories
 pool/
