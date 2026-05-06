@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Terminal, Settings, SlidersHorizontal, Activity, ChevronLeft, Send, Zap, Database, Loader2 } from 'lucide-react'
@@ -15,7 +15,7 @@ interface Message {
   latency?: number
 }
 
-export default function PlaygroundPage() {
+function PlaygroundContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const [systemPrompt, setSystemPrompt] = useState('You are a helpful AI assistant connected via ReadyPi.')
@@ -267,5 +267,17 @@ export default function PlaygroundPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PlaygroundPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#FF4500]" size={32} />
+      </div>
+    }>
+      <PlaygroundContent />
+    </Suspense>
   )
 }

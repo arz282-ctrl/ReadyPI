@@ -4,11 +4,29 @@
   "description": "ReadyPi AI API Aggregation Platform - Bangladesh's first AI gateway with bKash/Nagad payment",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon api/server.js",
-    "start": "node api/server.js",
-    "test": "jest --coverage",
-    "db:migrate": "psql readypi < database/schema.sql",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "jest --coverage --forceExit",
+    "test:watch": "jest --watch",
+    "db:migrate": "psql readypi < ../database/schema.sql",
     "db:reset": "psql -c 'DROP DATABASE IF EXISTS readypi;' && psql -c 'CREATE DATABASE readypi;' && npm run db:migrate"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": [
+      "./tests/setup.js"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "routes/**/*.js",
+      "middleware/**/*.js",
+      "services/**/*.js",
+      "utils/**/*.js",
+      "!utils/logger.js"
+    ]
   },
   "keywords": [
     "ai",
@@ -23,6 +41,7 @@
   "author": "Rareware Studio",
   "license": "PROPRIETARY",
   "dependencies": {
+    "@google/genai": "^1.52.0",
     "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",

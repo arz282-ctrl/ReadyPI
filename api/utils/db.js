@@ -2,11 +2,21 @@ const { Pool } = require('pg');
 const logger = require('./logger');
 
 // Create PostgreSQL connection pool
-// Supports DATABASE_URL (Neon/Supabase) or individual env vars (AWS RDS/Cloud SQL)
-const poolConfig = process.env.DATABASE_URL
+// Supports DATABASE_URL (Neon/Supabase/Cloud SQL proxy) or individual env vars
+const dbUrl = process.env.DATABASE_URL || '';
+const isUnixSocket = dbUrl.includes('/cloudsql/');
+const poolConfig = dbUrl
   ? {
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      connectionString: dbUrl,
+      ...(isUnixSocket ? {} : { ssl: { rejectUnauthorized: false } }),
+    }
+  : process.env.CLOUD_SQL_CONNECTION_NAME
+  ? {
+      // Cloud SQL Auth Proxy via Unix socket (Cloud Run native)
+      host: `/cloudsql/${process.env.CLOUD_SQL_CONNECTION_NAME}`,
+      database: process.env.DB_NAME || 'readypi',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD,
     }
   : {
       host: process.env.DB_HOST || 'localhost',

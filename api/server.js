@@ -11,12 +11,16 @@ const authRoutes = require('./routes/auth');
 const creditsRoutes = require('./routes/credits');
 const keysRoutes = require('./routes/keys');
 const paymentRoutes = require('./routes/payment');
+const assistantRoutes = require('./routes/assistant');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Trust proxy - required for Cloud Run
-app.set('trust proxy', true);
+// Use numeric value (1) instead of true to satisfy express-rate-limit's strict check
+if (process.env.NODE_ENV !== 'test') {
+  app.set('trust proxy', 1);
+}
 
 // ============================================================================
 // MIDDLEWARE
@@ -32,8 +36,20 @@ app.use(cors({
 }));
 
 // Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// NOTE: Stripe webhook requires the raw request body for signature verification.
+// We must skip the global JSON parser for that path — the route applies express.raw() itself.
+app.use((req, res, next) => {
+  if (req.originalUrl === '/payment/stripe/webhook') {
+    return next(); // skip — payment route's express.raw() handles it
+  }
+  express.json({ limit: '10mb' })(req, res, next);
+});
+app.use((req, res, next) => {
+  if (req.originalUrl === '/payment/stripe/webhook') {
+    return next();
+  }
+  express.urlencoded({ extended: true, limit: '10mb' })(req, res, next);
+});
 
 // Request logging
 app.use((req, res, next) => {
@@ -75,6 +91,7 @@ app.use('/auth', authRoutes);              // Signup, login, logout
 app.use('/credits', creditsRoutes);        // Credit balance, top-up
 app.use('/keys', keysRoutes);              // API key management
 app.use('/payment', paymentRoutes);        // Payment callbacks (SSLCommerz, NOWPayments)
+app.use('/assistant', assistantRoutes);    // Native ReadyPI live assistant (GPT-4o-mini, SSE)
 
 // ============================================================================
 // ERROR HANDLING
@@ -142,7 +159,9 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-// Start the server
-startServer();
+// Only start listening when run directly (not when required by Jest tests)
+if (require.main === module) {
+  startServer();
+}
 
 module.exports = app;

@@ -50,7 +50,7 @@ type Transaction @table(name: "transactions") {
   completedAt: Timestamp @col(name: "completed_at")
 }
 
-type Subscription @table(name: "subscriptions") {
+type UserSubscription @table(name: "subscriptions") {
   id: UUID! @default(expr: "uuidV4()")
   user: User!
   planTier: String! @col(name: "plan_tier")
@@ -58,8 +58,8 @@ type Subscription @table(name: "subscriptions") {
   priceBdt: Float! @col(name: "price_bdt")
   creditsPerMonth: Int64! @col(name: "credits_per_month")
   billingCycle: String! @default(value: "monthly") @col(name: "billing_cycle")
-  currentPeriodStart: Timestamp! @col(name: "current_period_start")
-  currentPeriodEnd: Timestamp! @col(name: "current_period_end")
+  currentPeriodStart: Date! @col(name: "current_period_start")
+  currentPeriodEnd: Date! @col(name: "current_period_end")
   cancelAtPeriodEnd: Boolean! @default(value: false) @col(name: "cancel_at_period_end")
   createdAt: Timestamp! @default(expr: "request.time") @col(name: "created_at")
   updatedAt: Timestamp! @default(expr: "request.time") @col(name: "updated_at")
@@ -68,7 +68,7 @@ type Subscription @table(name: "subscriptions") {
 type UsageLog @table(name: "usage_logs") {
   id: UUID! @default(expr: "uuidV4()")
   user: User!
-  apiKey: ApiKey! @col(name: "api_key_id")
+  apiKey: ApiKey!
   model: String!
   provider: String!
   promptTokens: Int! @col(name: "prompt_tokens")
@@ -85,8 +85,8 @@ type UsageLog @table(name: "usage_logs") {
 
 type Referral @table(name: "referrals") {
   id: UUID! @default(expr: "uuidV4()")
-  referrer: User! @col(name: "referrer_user_id")
-  referred: User! @col(name: "referred_user_id")
+  referrer: User!
+  referred: User!
   referralCode: String! @unique @col(name: "referral_code")
   creditsEarned: Int64! @default(value: 0) @col(name: "credits_earned")
   status: String! @default(value: "pending")
