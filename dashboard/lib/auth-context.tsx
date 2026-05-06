@@ -190,42 +190,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [exchangeToken]);
 
   const loginWithGoogle = useCallback(async () => {
+    if (!isFirebaseConfigured) {
+      const message = 'Google OAuth is not configured. Please use email/password to sign in.';
+      patch({ loading: false, error: message });
+      throw new Error(message);
+    }
     patch({ loading: true, error: null });
     try {
       const credential = await signInWithPopup(auth, googleProvider);
       await exchangeToken(credential.user);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Google login failed';
+      let message = 'Google login failed';
+      if (err instanceof Error) {
+        // Provide more specific error messages for common OAuth issues
+        if (err.message.includes('popup-closed')) {
+          message = 'Google sign-in was cancelled';
+        } else if (err.message.includes('network')) {
+          message = 'Network error. Please check your connection.';
+        } else if (err.message.includes('invalid-oauth')) {
+          message = 'Google OAuth is not properly configured. Please contact support.';
+        } else {
+          message = err.message;
+        }
+      }
       patch({ loading: false, error: message });
       throw err;
     }
   }, [exchangeToken]);
 
   const loginWithGithub = useCallback(async () => {
+    if (!isFirebaseConfigured) {
+      const message = 'GitHub OAuth is not configured. Please use email/password to sign in.';
+      patch({ loading: false, error: message });
+      throw new Error(message);
+    }
     patch({ loading: true, error: null });
     try {
       const credential = await signInWithPopup(auth, githubProvider);
       await exchangeToken(credential.user);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'GitHub login failed';
+      let message = 'GitHub login failed';
+      if (err instanceof Error) {
+        if (err.message.includes('popup-closed')) {
+          message = 'GitHub sign-in was cancelled';
+        } else if (err.message.includes('redirect_uri_mismatch')) {
+          message = 'GitHub OAuth redirect not configured. Please contact support.';
+        } else {
+          message = err.message;
+        }
+      }
       patch({ loading: false, error: message });
       throw err;
     }
   }, [exchangeToken]);
 
   const loginWithFacebook = useCallback(async () => {
+    if (!isFirebaseConfigured) {
+      const message = 'Facebook OAuth is not configured. Please use email/password to sign in.';
+      patch({ loading: false, error: message });
+      throw new Error(message);
+    }
     patch({ loading: true, error: null });
     try {
       const credential = await signInWithPopup(auth, facebookProvider);
       await exchangeToken(credential.user);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Facebook login failed';
+      let message = 'Facebook login failed';
+      if (err instanceof Error) {
+        if (err.message.includes('popup-closed')) {
+          message = 'Facebook sign-in was cancelled';
+        } else {
+          message = err.message;
+        }
+      }
       patch({ loading: false, error: message });
       throw err;
     }
   }, [exchangeToken]);
 
   const loginWithApple = useCallback(async () => {
+    if (!isFirebaseConfigured) {
+      const message = 'Apple OAuth is not configured. Please use email/password to sign in.';
+      patch({ loading: false, error: message });
+      throw new Error(message);
+    }
     patch({ loading: true, error: null });
     try {
       const credential = await signInWithPopup(auth, appleProvider);

@@ -16,27 +16,47 @@ const jwt = require('jsonwebtoken');
 const db = require('../utils/db');
 const logger = require('../utils/logger');
 
-let admin;
+// Initialize Firebase Admin SDK
+let admin = null;
+let firebaseInitialized = false;
+
 try {
   admin = require('firebase-admin');
   if (!admin.apps.length) {
-    // Only projectId is needed for verifyIdToken() — it uses Google's public keys
-    admin.initializeApp({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'readypi-core',
+    // Use FIREBASE_PROJECT_ID in Cloud Run (API-specific).
+    // Fall back to NEXT_PUBLIC_FIREBASE_PROJECT_ID for local dev convenience.
+    const projectId =
+      process.env.FIREBASE_PROJECT_ID ||
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+      'readypi-core';
+    
+    // In Cloud Run, Application Default Credentials are used automatically
+    // For local development, use gcloud auth application-default login
+    admin.initializeApp({ 
+      projectId,
+      // The SDK will automatically use ADC (Application Default Credentials)
     });
+    firebaseInitialized = true;
+    logger.info(`Firebase Admin initialized successfully with project: ${projectId}`);
   }
 } catch (err) {
-  logger.warn('Firebase Admin SDK not available. Firebase OAuth exchange disabled.', err.message);
+  logger.error('Firebase Admin SDK initialization failed:', err.message);
+  logger.warn('Firebase OAuth exchange will be disabled. OAuth providers will not work.');
 }
 
 /**
  * Verify a Firebase ID token and return the decoded claims.
  */
 async function verifyFirebaseToken(idToken) {
-  if (!admin) {
-    throw new Error('Firebase Admin SDK is not initialized');
+  if (!admin || !firebaseInitialized) {
+    throw new Error('Firebase Admin SDK is not initialized. Check server logs for initialization errors.');
   }
-  return admin.auth().verifyIdToken(idToken);
+  try {
+    return await admin.auth().verifyIdToken(idToken);
+  } catch (err) {
+    logger.error('Firebase token verification failed:', err.message);
+    throw err;
+  }
 }
 
 /**
@@ -73,7 +93,7 @@ async function upsertFirebaseUser(decodedToken) {
     // Update firebase_uid and email_verified if not already set
     await db.query(
       `UPDATE users SET
-        email_verified = COALESCE($1, email_verified),
+        email_verified = $1 OR email_verified,
         full_name = COALESCE(NULLIF($2, ''), full_name),
         updated_at = CURRENT_TIMESTAMP
        WHERE id = $3`,
@@ -102,7 +122,7 @@ async function upsertFirebaseUser(decodedToken) {
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (email) DO UPDATE SET
        full_name = COALESCE(NULLIF(EXCLUDED.full_name, ''), users.full_name),
-       email_verified = GREATEST(EXCLUDED.email_verified, users.email_verified),
+       email_verified = EXCLUDED.email_verified OR users.email_verified,
        updated_at = CURRENT_TIMESTAMP
      RETURNING id, email, full_name, plan_tier, created_at`,
     [email.toLowerCase(), placeholderHash, fullName, 'free', emailVerified]
@@ -173,10 +193,8 @@ function register(router) {
         token,
       });
     } catch (error) {
-      logger.error('Firebase exchange error:', {
-        error: error.message,
-        code: error.code,
-      });
+      console.error('FIREBASE EXCHANGE HARD ERROR:', error);
+      logger.error('Firebase exchange error: ' + error.message);
 
       if (error.code === 'auth/id-token-expired') {
         return res.status(401).json({

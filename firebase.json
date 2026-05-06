@@ -6,5 +6,27 @@
   },
   "dataconnect": {
     "source": "dataconnect"
+  },
+  "auth": {
+    "providers": {
+      "anonymous": true,
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "ReadyPI",
+        "supportEmail": "ahmedriyaz282@gmail.com"
+      },
+      "githubSignIn": {
+        "oAuthBrandDisplayName": "ReadyPI",
+        "supportEmail": "ahmedriyaz282@gmail.com"
+      },
+      "facebookSignIn": {
+        "oAuthBrandDisplayName": "ReadyPI",
+        "supportEmail": "ahmedriyaz282@gmail.com"
+      },
+      "appleSignIn": {
+        "oAuthBrandDisplayName": "ReadyPI",
+        "supportEmail": "ahmedriyaz282@gmail.com"
+      }
+    }
   }
 }
