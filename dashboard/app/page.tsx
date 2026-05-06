@@ -13,6 +13,7 @@ import PiMark from '@/components/PiMark'
 import Navbar from '@/components/Navbar'
 import { StatCard } from '@/components/ui/animated-counter'
 import { GlowingOrb, RevealOnScroll, FloatingElement, staggerItemVariants } from '@/components/ui/motion-primitives'
+import { useAuth } from '@/lib/auth-context'
 
 // Provider data - OpenRouter-style model showcase
 const providers = [
@@ -63,18 +64,6 @@ const providers = [
     status: 'operational',
     latency: '<120ms',
     uptime: '99.7%'
-  },
-  {
-    id: 'groq',
-    name: 'Groq',
-    logo: '◇',
-    color: '#f97316',
-    models: 12,
-    description: 'Llama 3.3, Mixtral — Ultra fast LPU inference',
-    featured: ['llama-3.3-70b', 'llama-3.1-8b', 'mixtral-8x7b'],
-    status: 'operational',
-    latency: '<50ms',
-    uptime: '99.9%'
   },
   {
     id: 'mistral',
@@ -195,14 +184,6 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     bestFor: ['Coding', 'Math', 'Reasoning at low cost'],
     pricing: 'From ৳0.10/1K tokens',
     keyFeatures: ['MOE architecture', 'Long context', 'Code expert', 'DeepThink mode'],
-  },
-  groq: {
-    website: 'https://groq.com',
-    founded: '2023',
-    headquarters: 'San Jose, CA',
-    bestFor: ['Speed critical', 'Real-time apps', 'Streaming'],
-    pricing: 'From ৳0.10/1K tokens',
-    keyFeatures: ['Fastest inference', 'LPU chips', 'Open models', 'No hidden costs'],
   },
   mistral: {
     website: 'https://mistral.ai',
@@ -374,9 +355,9 @@ const trustIndicators = [
 // Stats for counter animation
 const stats = [
   { value: 150, suffix: '+', label: 'AI Models', icon: <Layers size={20} /> },
-  { value: 999, suffix: '%', label: 'Uptime SLA', icon: <Server size={20} /> },
+  { value: 99, suffix: '.9%', label: 'Uptime SLA', icon: <Server size={20} /> },
   { value: 100, suffix: 'ms', label: 'Avg Latency', icon: <Clock size={20} /> },
-  { value: 5000, suffix: '+', label: 'Active Users', icon: <Users size={20} /> },
+  { value: 5, suffix: 'K+', label: 'Active Users', icon: <Users size={20} /> },
 ]
 
 // Testimonials
@@ -408,6 +389,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [activeCodeTab, setActiveCodeTab] = useState(0)
   const [activeProvider, setActiveProvider] = useState<string>('all')
+  const { user } = useAuth()
   
   useEffect(() => { setMounted(true) }, [])
 
@@ -451,15 +433,15 @@ export default function Home() {
             {/* Headline */}
             <motion.h1 variants={staggerItemVariants} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-fraunces font-black leading-[1.05] mb-6 text-white tracking-tight">
               One API.{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff8a6a] via-[#ff6b4a] to-[#c8381a]">150+ Models.</span>{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff8a6a] via-[#ff6b4a] to-[#c8381a]">150+ Models.</span>
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-300">Your Currency.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-300">Pay in Your Currency.</span>
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p variants={staggerItemVariants} className="text-base sm:text-lg text-gray-400 max-w-xl leading-relaxed mb-8 sm:mb-10 mx-auto lg:mx-0">
               Access GPT-4o, Claude, Gemini, Llama, DeepSeek, and 150+ more models through one standardized API.
-              <span className="text-[#ff6b4a] font-semibold"> Pay with bKash, Nagad, Rocket, USDT, or card — your local currency, always.</span>
+              <span className="text-[#ff6b4a] font-semibold"> Pay with bKash, Nagad, Rocket, USDT, or card — always in your local currency.</span>
             </motion.p>
 
             {/* CTA Buttons */}
@@ -568,7 +550,7 @@ export default function Home() {
 
           {/* Provider Filter */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {['all', 'openai', 'anthropic', 'google', 'deepseek', 'groq', 'mistral', 'meta', 'openrouter'].map((filter) => (
+            {['all', 'openai', 'anthropic', 'google', 'deepseek', 'mistral', 'meta', 'openrouter'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveProvider(filter)}
@@ -885,42 +867,44 @@ export default function Home() {
       </section>
 
       {/* ── CTA Section ── */}
-      <section className="py-20 sm:py-32 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl pointer-events-none opacity-25" style={{ background: 'radial-gradient(circle, rgba(255,107,74,0.2) 0%, transparent 70%)' }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f] to-[#0d1117]" />
-        
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 1 }}
-            viewport={{ once: true }}
-          >
-            {/* Animated Pi symbol */}
+      {!user && (
+        <section className="py-20 sm:py-32 relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl pointer-events-none opacity-25" style={{ background: 'radial-gradient(circle, rgba(255,107,74,0.2) 0%, transparent 70%)' }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f] to-[#0d1117]" />
+          
+          <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
             <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              whileInView={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 100, damping: 15 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 1 }}
               viewport={{ once: true }}
-              className="mb-8 inline-block"
             >
-              <PiMark variant="hero" size={200} showEyes={true} showOrbit={true} showLabels={false} />
-            </motion.div>
+              {/* Animated Pi symbol */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                whileInView={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                viewport={{ once: true }}
+                className="mb-8 inline-block"
+              >
+                <PiMark variant="hero" size={200} showEyes={true} showOrbit={true} showLabels={false} />
+              </motion.div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-fraunces font-black text-white mb-6">
-              Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff8a6a] to-[#c8381a]">Build?</span>
-            </h2>
-            <p className="text-gray-400 text-lg mb-10 font-mono">
-              Get 50 free credits when you sign up. No credit card required.
-            </p>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/signup" className="inline-flex items-center gap-3 bg-gradient-to-r from-[#ff6b4a] to-[#c8381a] text-white px-10 py-5 rounded-2xl font-bold text-base uppercase tracking-wide hover:shadow-[0_0_60px_rgba(255,107,74,0.5)] transition-all">
-                <Rocket size={20} /> Start Free — 50K Tokens
-              </Link>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-fraunces font-black text-white mb-6">
+                Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff8a6a] to-[#c8381a]">Build?</span>
+              </h2>
+              <p className="text-gray-400 text-lg mb-10 font-mono">
+                Get 50 free credits when you sign up. No credit card required.
+              </p>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                <Link href="/signup" className="inline-flex items-center gap-3 bg-gradient-to-r from-[#ff6b4a] to-[#c8381a] text-white px-10 py-5 rounded-2xl font-bold text-base uppercase tracking-wide hover:shadow-[0_0_60px_rgba(255,107,74,0.5)] transition-all">
+                  <Rocket size={20} /> Start Free — 50K Tokens
+                </Link>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {/* ── Footer ── */}
       <footer className="bg-[#050508] border-t border-gray-900 pt-16 pb-8 px-4 sm:px-6">

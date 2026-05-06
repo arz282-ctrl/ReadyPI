@@ -190,11 +190,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [exchangeToken]);
 
   const loginWithGoogle = useCallback(async () => {
-    if (!isFirebaseConfigured) {
-      const message = 'Google OAuth is not configured. Please use email/password to sign in.';
-      patch({ loading: false, error: message });
-      throw new Error(message);
-    }
     patch({ loading: true, error: null });
     try {
       const credential = await signInWithPopup(auth, googleProvider);
@@ -209,6 +204,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           message = 'Network error. Please check your connection.';
         } else if (err.message.includes('invalid-oauth')) {
           message = 'Google OAuth is not properly configured. Please contact support.';
+        } else if (err.message.includes('auth/unauthorized-domain')) {
+          message = 'This domain is not authorized for OAuth. Please use email/password instead.';
         } else {
           message = err.message;
         }
@@ -219,11 +216,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [exchangeToken]);
 
   const loginWithGithub = useCallback(async () => {
-    if (!isFirebaseConfigured) {
-      const message = 'GitHub OAuth is not configured. Please use email/password to sign in.';
-      patch({ loading: false, error: message });
-      throw new Error(message);
-    }
     patch({ loading: true, error: null });
     try {
       const credential = await signInWithPopup(auth, githubProvider);
@@ -235,6 +227,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           message = 'GitHub sign-in was cancelled';
         } else if (err.message.includes('redirect_uri_mismatch')) {
           message = 'GitHub OAuth redirect not configured. Please contact support.';
+        } else if (err.message.includes('auth/unauthorized-domain')) {
+          message = 'This domain is not authorized for OAuth. Please use email/password instead.';
         } else {
           message = err.message;
         }

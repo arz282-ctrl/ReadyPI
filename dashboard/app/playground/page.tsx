@@ -161,6 +161,14 @@ export default function PlaygroundPage() {
                 onChange={e => setModel(e.target.value)}
                 className="w-full bg-[#050508] border border-gray-800 rounded p-2 text-sm text-white focus:outline-none focus:border-[#FF4500]/50"
               >
+                <optgroup label="Free Models — No Credits Required">
+                  <option value="google/gemini-2.5-flash">Gemini 2.5 Flash (Free)</option>
+                  <option value="meta-llama/llama-3.3-70b">Llama 3.3 70B (Free)</option>
+                  <option value="deepseek/deepseek-r1">DeepSeek R1 (Free)</option>
+                  <option value="mistralai/mistral-nemo">Mistral Nemo (Free)</option>
+                  <option value="qwen/qwen-2.5-72b">Qwen 2.5 72B (Free)</option>
+                  <option value="microsoft/phi-3-mini-128k">Phi-3 Mini (Free)</option>
+                </optgroup>
                 <optgroup label="DeepSeek">
                   <option value="deepseek/deepseek-chat">DeepSeek V3</option>
                   <option value="deepseek/deepseek-reasoner">DeepSeek R1 (Full)</option>
