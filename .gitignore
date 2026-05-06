@@ -4,10 +4,16 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# Environment variables
+# Environment variables — NEVER commit any .env file
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
+api/.env
+api/.env.*
+!api/.env.example
+dashboard/.env
+dashboard/.env.*
+!dashboard/.env.local.example
 
 # Logs
 logs/
@@ -70,13 +76,13 @@ dashboard/.env*.local
 # Skills lockfile
 skills-lock.json
 
-# Large binary / media files
-*.mov
-*.zip
-*.pptx
-*.pdf
-ReadyPI Complete UI:Ux.zip
-ReadyPI Complete Ui:Ux/
+# Agent directories
+.agents/
+.pi/
 
-# Claude worktrees
-.claude/
+# Embedded git repositories
+pool/
+
+# Environment files with secrets
+*.env.yaml
+db_url_secret.txt
