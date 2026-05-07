@@ -22,7 +22,8 @@ readonly FB_APP_ID="1:1054908407663:web:de8d6275fb121d9e30529a"
 readonly FB_MEASUREMENT_ID="G-YLZMBEQRFW"
 
 # API URL that the dashboard calls
-readonly API_URL="https://readypi-api-1054908407663.asia-southeast1.run.app"
+readonly API_URL="https://readypi-api-jhuoxne7ta-as.a.run.app"
+readonly API_SA="readypi-api-sa@readypi-core.iam.gserviceaccount.com"
 
 # CORS — all domains the API must accept
 readonly API_CORS="http://localhost:3001,http://localhost:3000,https://readypi-dashboard-jhuoxne7ta-as.a.run.app,https://readypi-dashboard-1054908407663.asia-southeast1.run.app,https://readypi-core.web.app,https://readypi-core.firebaseapp.com,https://readypi.site,https://www.readypi.site,https://readypi.online,https://www.readypi.online"
@@ -49,37 +50,23 @@ prereqs() {
 
 # ─── Step 1: Fix Cloud SQL IAM ──────────────────────────────────────────────
 fix_iam() {
-  log "Fixing Cloud SQL IAM permissions..."
-
-  # Get the default Cloud Run service account
-  local SA_EMAIL
-  SA_EMAIL=$(gcloud iam service-accounts list \
-    --project="$PROJECT_ID" \
-    --filter="displayName:Compute Engine default" \
-    --format="value(email)" 2>/dev/null || echo "")
-
-  if [[ -z "$SA_EMAIL" ]]; then
-    # Fallback: use project number
-    local PROJECT_NUMBER
-    PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectNumber)")
-    SA_EMAIL="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
-  fi
-
-  log "Service account: $SA_EMAIL"
+  log "Fixing Cloud SQL IAM permissions for $API_SA..."
 
   # Grant Cloud SQL Client role
+  log "Granting roles/cloudsql.client..."
   gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$SA_EMAIL" \
+    --member="serviceAccount:$API_SA" \
     --role="roles/cloudsql.client" \
-    --quiet 2>/dev/null || true
+    --quiet
 
-  # Also grant Cloud SQL Instance User for IAM auth
+  # Also grant Cloud SQL Instance User (for IAM auth if needed)
+  log "Granting roles/cloudsql.instanceUser..."
   gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$SA_EMAIL" \
+    --member="serviceAccount:$API_SA" \
     --role="roles/cloudsql.instanceUser" \
-    --quiet 2>/dev/null || true
+    --quiet
 
-  ok "Cloud SQL IAM permissions granted"
+  ok "Cloud SQL IAM permissions granted to $API_SA"
 }
 
 # ─── Step 2: Deploy API ─────────────────────────────────────────────────────
@@ -137,6 +124,7 @@ deploy_api() {
     --source . \
     --platform managed \
     --allow-unauthenticated \
+    --service-account "$API_SA" \
     --add-cloudsql-instances "$CLOUD_SQL_INSTANCE" \
     --set-env-vars "^||^NODE_ENV=production||CLOUD_SQL_CONNECTION_NAME=${CLOUD_SQL_INSTANCE}||DB_NAME=readypi||DB_USER=postgres||DB_PASSWORD=${DB_PASSWORD}||DB_SSL=false||JWT_SECRET=${JWT_SECRET}||FIREBASE_PROJECT_ID=${FB_PROJECT_ID}||CORS_ORIGIN=${API_CORS}||API_KEY_SALT_ROUNDS=12||LOG_LEVEL=info||GOOGLE_API_KEY=${GOOGLE_KEY}||OPENAI_API_KEY=${OPENAI_KEY}||ANTHROPIC_API_KEY=${ANTHROPIC_KEY}||DEEPSEEK_API_KEY=${DEEPSEEK_KEY}||OPENROUTER_API_KEY=${OPENROUTER_KEY}||FIREWORKS_API_KEY=${FIREWORKS_KEY}||MODAL_API_KEY=${MODAL_KEY}||MISTRAL_API_KEY=${MISTRAL_KEY}||STRIPE_SECRET_KEY=${STRIPE_SECRET}||STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK}||NOWPAYMENTS_API_KEY=${NOWPAY_KEY}||NOWPAYMENTS_IPN_SECRET=${NOWPAY_IPN}||NOWPAYMENTS_IS_SANDBOX=false||BKASH_NUMBER=01710515419||BKASH_NUMBER_2=01930195711||NAGAD_NUMBER=01710515419||ROCKET_NUMBER=01710515419||UPAY_NUMBER=01930195711||ADMIN_EMAIL=rarewarestudio@gmail.com||AWS_ACCESS_KEY_ID=${AWS_KEY}||AWS_SECRET_ACCESS_KEY=${AWS_SECRET}||AWS_REGION=${AWS_REGION_VAL}" \
     --port 8080 \
@@ -213,20 +201,20 @@ summary() {
   echo -e "${C_OK}═══════════════════════════════════════════════════════════════${C_RESET}"
   echo ""
   echo "  Services:"
-  echo "    API:       https://readypi-api-1054908407663.asia-southeast1.run.app"
-  echo "    Dashboard: https://readypi-dashboard-1054908407663.asia-southeast1.run.app"
+  echo "    API:       $API_URL"
+  echo "    Dashboard: https://readypi-dashboard-jhuoxne7ta-as.a.run.app"
   echo ""
   echo "  Custom Domains (via Firebase Hosting):"
   echo "    https://readypi.site"
   echo "    https://readypi.online"
   echo ""
   echo -e "${C_WARN}  ⚠ Verify these domains are in Firebase Auth → Authorized Domains:${C_RESET}"
-  echo "    https://console.firebase.google.com/project/$readypi-core/authentication/settings"
+  echo "    https://console.firebase.google.com/project/$PROJECT_ID/authentication/settings"
   echo ""
-  echo "    • readypi-dashboard-1054908407663.asia-southeast1.run.app"
+  echo "    • readypi-dashboard-jhuoxne7ta-as.a.run.app"
   echo "    • readypi.site / www.readypi.site"
   echo "    • readypi.online / www.readypi.online"
-  echo "    • readypi-core.web.app / readypi-core.firebaseapp.com"
+  echo "    • $PROJECT_ID.web.app / $PROJECT_ID.firebaseapp.com"
   echo ""
 }
 
