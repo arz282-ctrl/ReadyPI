@@ -11,7 +11,8 @@ const authRoutes = require('./routes/auth');
 const creditsRoutes = require('./routes/credits');
 const keysRoutes = require('./routes/keys');
 const paymentRoutes = require('./routes/payment');
-const assistantRoutes = require('./routes/assistant');
+// Assistant routes - disabled (file not yet created)
+// const assistantRoutes = require('./routes/assistant');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -143,7 +144,7 @@ app.use('/auth', authRoutes);              // Signup, login, logout
 app.use('/credits', creditsRoutes);        // Credit balance, top-up
 app.use('/keys', keysRoutes);              // API key management
 app.use('/payment', paymentRoutes);        // Payment callbacks (SSLCommerz, NOWPayments)
-app.use('/assistant', assistantRoutes);    // Native ReadyPI live assistant (GPT-4o-mini, SSE)
+// app.use('/assistant', assistantRoutes);    // Native ReadyPI live assistant (GPT-4o-mini, SSE) - disabled
 
 // ============================================================================
 // ERROR HANDLING
@@ -180,18 +181,30 @@ app.use((err, req, res, next) => {
 // SERVER STARTUP
 // ============================================================================
 
+// Timeout wrapper for database queries (prevents hanging on Cloud SQL connection issues)
+function withTimeout(promise, timeoutMs = 5000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => 
+      setTimeout(() => reject(new Error(`Database connection timed out after ${timeoutMs}ms`)), timeoutMs)
+    )
+  ]);
+}
+
 async function startServer() {
-  // Test database connection
+  // Test database connection with timeout
   try {
-    await db.query('SELECT NOW()');
+    logger.info('Testing database connection...');
+    await withTimeout(db.query('SELECT NOW()'), 5000);
     logger.info('Database connection established');
   } catch (error) {
     logger.warn('⚠️  Database connection failed on startup. Endpoints requiring the database will fail.');
-    logger.error('Database connection error:', error.message);
+    logger.warn('Database connection error:', error.message);
+    logger.warn('The server will start anyway - database-dependent endpoints may not work.');
   }
 
-  // Start Express server
-  app.listen(PORT, '0.0.0.0', () => {
+  // Start Express server - this MUST be called for container health check to pass
+  const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(`ReadyPi API Gateway running on http://0.0.0.0:${PORT}`);
     logger.info(`Environment: ${process.env.NODE_ENV}`);
     logger.info(`Base URL: ${process.env.API_BASE_URL || `http://0.0.0.0:${PORT}`}`);
@@ -200,6 +213,12 @@ async function startServer() {
     if (process.send) {
       process.send('ready');
     }
+  });
+
+  // Handle server error
+  server.on('error', (err) => {
+    logger.error('Server error:', err);
+    process.exit(1);
   });
 }
 
