@@ -53,10 +53,6 @@ temp/
 *.sqlite
 *.sqlite3
 
-# Data Connect pglite data
-.dataconnect/pgliteData/
-!.dataconnect/schema/
-
 # Secrets
 *.pem
 *.key
