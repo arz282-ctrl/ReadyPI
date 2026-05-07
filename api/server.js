@@ -74,6 +74,58 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Detailed health check with service diagnostics
+app.get('/health/detailed', async (req, res) => {
+  const diagnostics = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV,
+    services: {
+      database: { status: 'checking' },
+      firebase: { status: 'checking' }
+    }
+  };
+
+  // Check database connection (await to avoid race condition)
+  try {
+    await db.query('SELECT NOW()');
+    diagnostics.services.database.status = 'ok';
+    diagnostics.services.database.message = 'Database connection healthy';
+  } catch (err) {
+    diagnostics.services.database.status = 'error';
+    diagnostics.services.database.message = err.message;
+    diagnostics.status = 'degraded';
+  }
+
+  // Check Firebase configuration
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+      const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      if (sa.project_id && sa.private_key && sa.client_email) {
+        diagnostics.services.firebase.status = 'configured';
+        diagnostics.services.firebase.project_id = sa.project_id;
+        diagnostics.services.firebase.client_email = sa.client_email;
+        diagnostics.services.firebase.message = 'Firebase credentials are valid';
+      } else {
+        diagnostics.services.firebase.status = 'error';
+        diagnostics.services.firebase.message = 'Firebase service account missing required fields';
+        diagnostics.status = 'degraded';
+      }
+    } catch (parseErr) {
+      diagnostics.services.firebase.status = 'error';
+      diagnostics.services.firebase.message = `Firebase service account JSON parsing failed: ${parseErr.message}`;
+      diagnostics.status = 'degraded';
+    }
+  } else {
+    diagnostics.services.firebase.status = 'not_configured';
+    diagnostics.services.firebase.message = 'FIREBASE_SERVICE_ACCOUNT environment variable is not set';
+    diagnostics.status = 'degraded';
+  }
+
+  res.json(diagnostics);
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({

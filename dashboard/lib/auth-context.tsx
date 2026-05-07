@@ -190,6 +190,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [exchangeToken]);
 
   const loginWithGoogle = useCallback(async () => {
+    if (!isFirebaseConfigured) {
+      const message = 'Google OAuth is not configured. Please use email/password to sign in.';
+      patch({ loading: false, error: message });
+      throw new Error(message);
+    }
     patch({ loading: true, error: null });
     console.log('[OAuth] Attempting Google login...');
     try {
@@ -221,6 +226,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [exchangeToken]);
 
   const loginWithGithub = useCallback(async () => {
+    if (!isFirebaseConfigured) {
+      const message = 'GitHub OAuth is not configured. Please use email/password to sign in.';
+      patch({ loading: false, error: message });
+      throw new Error(message);
+    }
     patch({ loading: true, error: null });
     try {
       const credential = await signInWithPopup(auth, githubProvider);

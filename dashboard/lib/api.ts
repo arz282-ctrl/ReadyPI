@@ -106,7 +106,7 @@ export const authAPI = {
    * This bridges Firebase Auth with our Postgres-backed user system.
    */
   firebaseExchange: (firebaseIdToken: string) =>
-    api.post<LoginResponse>('/auth/firebase-exchange', { id_token: firebaseIdToken }),
+    api.post<LoginResponse>('/auth/firebase-exchange', { idToken: firebaseIdToken }),
 };
 
 // ─── Chat endpoints ───────────────────────────────────────────────────────────

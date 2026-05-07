@@ -14,23 +14,11 @@
       "googleSignIn": {
         "oAuthBrandDisplayName": "ReadyPI",
         "supportEmail": "ahmedriyaz282@gmail.com"
-      },
-      "githubSignIn": {
-        "oAuthBrandDisplayName": "ReadyPI",
-        "supportEmail": "ahmedriyaz282@gmail.com"
-      },
-      "facebookSignIn": {
-        "oAuthBrandDisplayName": "ReadyPI",
-        "supportEmail": "ahmedriyaz282@gmail.com"
-      },
-      "appleSignIn": {
-        "oAuthBrandDisplayName": "ReadyPI",
-        "supportEmail": "ahmedriyaz282@gmail.com"
       }
     }
   },
   "hosting": {
-    "public": "dashboard/.next/standalone",
+    "public": "dashboard/public",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -39,7 +27,10 @@
     "rewrites": [
       {
         "source": "**",
-        "destination": "/index.html"
+        "run": {
+          "serviceId": "readypi-dashboard",
+          "region": "asia-southeast1"
+        }
       }
     ],
     "headers": [

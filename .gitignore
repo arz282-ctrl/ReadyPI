@@ -102,8 +102,8 @@ start-*.sh
 lambda-*.js
 *-local.sh
 
-# Build configs
-cloudbuild.yaml
+# Build configs - KEEP (needed for Cloud Build CI/CD)
+# cloudbuild.yaml
 
 # Embedded git repositories
 pool/
