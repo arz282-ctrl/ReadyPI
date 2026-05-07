@@ -195,6 +195,11 @@ async function startServer() {
     logger.info(`ReadyPi API Gateway running on http://0.0.0.0:${PORT}`);
     logger.info(`Environment: ${process.env.NODE_ENV}`);
     logger.info(`Base URL: ${process.env.API_BASE_URL || `http://0.0.0.0:${PORT}`}`);
+    
+    // Tell PM2 the app is ready (required for pm2-runtime container startup)
+    if (process.send) {
+      process.send('ready');
+    }
   });
 }
 
