@@ -5,7 +5,10 @@ Dockerfile
 .git
 .gitignore
 .env
-.env.*
+.env.local
+.env.local.example
+.env.development
 README.md
 .next
 out
+logs

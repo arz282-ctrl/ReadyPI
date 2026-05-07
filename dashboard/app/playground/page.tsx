@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Terminal, Settings, SlidersHorizontal, Activity, ChevronLeft, Send, Zap, Database, Loader2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { chatAPI } from '@/lib/api'
@@ -14,12 +15,13 @@ interface Message {
   latency?: number
 }
 
-export default function PlaygroundPage() {
+function PlaygroundContent() {
   const { user } = useAuth()
+  const searchParams = useSearchParams()
   const [systemPrompt, setSystemPrompt] = useState('You are a helpful AI assistant connected via ReadyPi.')
   const [chatInput, setChatInput] = useState('')
   const [isSending, setIsSending] = useState(false)
-  const [model, setModel] = useState('google/gemini-1.5-flash')
+  const [model, setModel] = useState('google/gemini-2.5-flash:free')
   const [temp, setTemp] = useState(0.7)
   const [maxTokens, setMaxTokens] = useState(1024)
   const [messages, setMessages] = useState<Message[]>([
@@ -32,6 +34,14 @@ export default function PlaygroundPage() {
       latency: 0.4
     }
   ])
+
+  // Read model from URL query parameter on mount
+  useEffect(() => {
+    const modelParam = searchParams.get('model')
+    if (modelParam) {
+      setModel(modelParam)
+    }
+  }, [searchParams])
 
   const handleSend = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -161,6 +171,15 @@ export default function PlaygroundPage() {
                 onChange={e => setModel(e.target.value)}
                 className="w-full bg-[#050508] border border-gray-800 rounded p-2 text-sm text-white focus:outline-none focus:border-[#FF4500]/50"
               >
+                <optgroup label="Free Models — No Credits Required">
+                  <option value="google/gemini-2.5-flash:free">Gemini 2.5 Flash (Free)</option>
+                  <option value="google/gemini-2.5-flash-preview-05-20:free">Gemini 2.5 Flash Preview (Free)</option>
+                  <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
+                  <option value="deepseek/deepseek-r1:free">DeepSeek R1 (Free)</option>
+                  <option value="mistralai/mistral-nemo:free">Mistral Nemo (Free)</option>
+                  <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
+                  <option value="microsoft/phi-3-mini-128k-instruct:free">Phi-3 Mini (Free)</option>
+                </optgroup>
                 <optgroup label="DeepSeek">
                   <option value="deepseek/deepseek-chat">DeepSeek V3</option>
                   <option value="deepseek/deepseek-reasoner">DeepSeek R1 (Full)</option>
@@ -248,5 +267,17 @@ export default function PlaygroundPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PlaygroundPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#FF4500]" size={32} />
+      </div>
+    }>
+      <PlaygroundContent />
+    </Suspense>
   )
 }

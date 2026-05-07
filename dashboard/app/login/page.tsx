@@ -129,7 +129,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="user@domain.ext"
+                  placeholder="Enter your email"
                   disabled={loading}
                   className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
                 />
@@ -155,7 +155,7 @@ export default function LoginPage() {
                     autoComplete="current-password"
                     value={passphrase}
                     onChange={(e) => setPassphrase(e.target.value)}
-                    placeholder="••••••••••••"
+                    placeholder="Enter your password"
                     disabled={loading}
                     className="input-elite pr-12 disabled:opacity-50 disabled:cursor-not-allowed"
                   />

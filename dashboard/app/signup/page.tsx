@@ -179,7 +179,7 @@ export default function SignupPage() {
                   autoComplete="name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Ahmed Riyaz"
+                  placeholder="Enter your full name"
                   disabled={loading}
                   className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
                 />
@@ -204,7 +204,7 @@ export default function SignupPage() {
                   autoComplete="email"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="user@domain.ext"
+                  placeholder="Enter your email"
                   required
                   disabled={loading}
                   className="input-elite disabled:opacity-50 disabled:cursor-not-allowed"
@@ -231,7 +231,7 @@ export default function SignupPage() {
                     autoComplete="new-password"
                     value={passphrase}
                     onChange={(e) => setPassphrase(e.target.value)}
-                    placeholder="••••••••••••"
+                    placeholder="Create a password"
                     minLength={8}
                     required
                     disabled={loading}

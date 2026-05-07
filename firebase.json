@@ -14,19 +14,33 @@
       "googleSignIn": {
         "oAuthBrandDisplayName": "ReadyPI",
         "supportEmail": "ahmedriyaz282@gmail.com"
-      },
-      "githubSignIn": {
-        "oAuthBrandDisplayName": "ReadyPI",
-        "supportEmail": "ahmedriyaz282@gmail.com"
-      },
-      "facebookSignIn": {
-        "oAuthBrandDisplayName": "ReadyPI",
-        "supportEmail": "ahmedriyaz282@gmail.com"
-      },
-      "appleSignIn": {
-        "oAuthBrandDisplayName": "ReadyPI",
-        "supportEmail": "ahmedriyaz282@gmail.com"
       }
     }
+  },
+  "hosting": {
+    "public": "dashboard/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "readypi-dashboard",
+          "region": "asia-southeast1"
+        }
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [{
+          "key": "Cache-Control",
+          "value": "max-age=31536000"
+        }]
+      }
+    ]
   }
 }

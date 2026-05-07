@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
@@ -8,6 +8,7 @@ import { keysAPI, creditsAPI } from '@/lib/api'
 import {
   Key, Plus, Trash2, Copy, Check, TerminalSquare, ChevronLeft,
   Loader2, LogOut, Rocket, ArrowRight, RefreshCw, Shield,
+  ChevronDown, User, CreditCard, LayoutDashboard, Zap,
 } from 'lucide-react'
 
 // Dashboard components
@@ -143,6 +144,8 @@ export default function UserDashboard() {
 
   // Tab state
   const [tab, setTab] = useState<'overview' | 'keys' | 'logs'>('overview')
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Key management
   const [keys, setKeys] = useState<APIKey[]>([])
@@ -168,6 +171,17 @@ export default function UserDashboard() {
       router.push('/login')
     }
   }, [user, authLoading, router])
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Fetch data on mount
   useEffect(() => {
@@ -294,16 +308,54 @@ export default function UserDashboard() {
 
           <div className="flex items-center gap-3">
             {/* Credits pill */}
-            <Link href="/billing" className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#111118] border border-[#1f1f23] rounded-lg hover:border-[#ff6b4a]/30 transition-colors">
-              <span className="text-[10px] uppercase tracking-wider text-[#6b6b76]">Credits</span>
-              <span className="text-sm font-bold font-mono text-[#00ff88]">{user.credits?.balance?.toLocaleString() || 0}</span>
+            <Link href="/billing" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ff6b4a]/10 border border-[#ff6b4a]/20 hover:border-[#ff6b4a]/40 transition-all">
+              <Zap size={12} className="text-[#ff6b4a]" />
+              <span className="font-mono text-xs text-[#ff6b4a] font-semibold">{user.credits?.balance?.toLocaleString() || 0}</span>
             </Link>
 
-            <div className="text-xs text-[#6b6b76] hidden sm:block">{user.email?.split('@')[0]}</div>
+            {/* Profile dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6b4a] to-[#c8381a] flex items-center justify-center text-white text-xs font-bold">
+                  {user.full_name ? user.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : user.email?.[0]?.toUpperCase() || '?'}
+                </div>
+                <ChevronDown size={14} className={`text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-            <button onClick={() => logout()} className="p-2 text-[#6b6b76] hover:text-[#ff6b4a] hover:bg-[#ff6b4a]/10 rounded-lg transition-colors" title="Log Out">
-              <LogOut size={16} />
-            </button>
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-[#111118] border border-[#1f1f23] rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-[#1f1f23]">
+                    <div className="text-sm text-white font-semibold truncate">{user.full_name || 'User'}</div>
+                    <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                    <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-md bg-[#ff6b4a]/10 border border-[#ff6b4a]/20">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-[#ff6b4a] font-semibold">{user.plan_tier}</span>
+                    </div>
+                  </div>
+                  <div className="py-1">
+                    <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+                      <User size={15} /> Profile
+                    </Link>
+                    <Link href="/dashboard?tab=keys" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+                      <Key size={15} /> API Keys
+                    </Link>
+                    <Link href="/pricing" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+                      <CreditCard size={15} /> Billing
+                    </Link>
+                  </div>
+                  <div className="border-t border-[#1f1f23] py-1">
+                    <button
+                      onClick={() => logout()}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors w-full text-left"
+                    >
+                      <LogOut size={15} /> Log Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </nav>
@@ -335,37 +387,53 @@ export default function UserDashboard() {
         {/* ═══ OVERVIEW TAB ═══ */}
         {tab === 'overview' && (
           <div className="space-y-6">
-            {!hasData && !loadingStats ? (
-              <EmptyState />
-            ) : (
-              <>
-                <StatsCards
-                  totalRequests={totalRequests}
-                  totalTokens={totalTokens}
-                  avgLatency={avgLatency}
-                  totalCostBdt={totalCostBdt}
-                  dailyUsage={dailyUsage}
-                />
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <UsageChart dailyUsage={dailyUsage} loading={loadingStats} />
+            {!hasData && !loadingStats && (
+              <div className="bg-[#111118] border border-[#1f1f23] rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-[#ff6b4a]/10 flex items-center justify-center flex-shrink-0">
+                    <Rocket size={18} className="text-[#ff6b4a]" />
                   </div>
                   <div>
-                    <ModelDistribution data={modelBreakdown} totalRequests={totalRequests} loading={loadingStats} />
+                    <p className="text-white text-sm font-semibold">Get started</p>
+                    <p className="text-[#6b6b76] text-xs">Generate an API key and make your first request to see live data.</p>
                   </div>
                 </div>
-
-                <LogsTable
-                  logs={usage}
-                  loading={loadingUsage}
-                  total={usageTotal}
-                  limit={usageLimit}
-                  offset={usageOffset}
-                  onPageChange={(newOffset) => fetchUsage(newOffset)}
-                />
-              </>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Link href="/docs" className="inline-flex items-center gap-1.5 bg-[#ff6b4a] text-white px-4 py-2 rounded-lg text-xs font-bold hover:shadow-[0_0_20px_rgba(255,107,74,0.3)] transition-all">
+                    Quickstart <ArrowRight size={12} />
+                  </Link>
+                  <Link href="/playground" className="inline-flex items-center gap-1.5 border border-[#1f1f23] text-white px-4 py-2 rounded-lg text-xs font-medium hover:border-[#ff6b4a]/30 transition-all">
+                    <TerminalSquare size={12} /> Playground
+                  </Link>
+                </div>
+              </div>
             )}
+
+            <StatsCards
+              totalRequests={totalRequests}
+              totalTokens={totalTokens}
+              avgLatency={avgLatency}
+              totalCostBdt={totalCostBdt}
+              dailyUsage={dailyUsage}
+            />
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <UsageChart dailyUsage={dailyUsage} loading={loadingStats} />
+              </div>
+              <div>
+                <ModelDistribution data={modelBreakdown} totalRequests={totalRequests} loading={loadingStats} />
+              </div>
+            </div>
+
+            <LogsTable
+              logs={usage}
+              loading={loadingUsage}
+              total={usageTotal}
+              limit={usageLimit}
+              offset={usageOffset}
+              onPageChange={(newOffset) => fetchUsage(newOffset)}
+            />
           </div>
         )}
 

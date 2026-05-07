@@ -196,23 +196,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(message);
     }
     patch({ loading: true, error: null });
+    console.log('[OAuth] Attempting Google login...');
     try {
       const credential = await signInWithPopup(auth, googleProvider);
+      console.log('[OAuth] Google credential received:', credential.user?.uid);
       await exchangeToken(credential.user);
+      console.log('[OAuth] Google login successful');
     } catch (err: unknown) {
       let message = 'Google login failed';
+      let errorCode = '';
       if (err instanceof Error) {
-        // Provide more specific error messages for common OAuth issues
-        if (err.message.includes('popup-closed')) {
+        errorCode = (err as any).code || '';
+        if (errorCode.includes('popup-closed') || err.message.includes('popup-closed')) {
           message = 'Google sign-in was cancelled';
+        } else if (errorCode.includes('unauthorized-domain')) {
+          message = 'This domain is not authorized for OAuth. Please add it to Firebase Console > Authentication > Settings > Authorized domains.';
+        } else if (errorCode.includes('invalid-oauth')) {
+          message = 'Google OAuth is not properly configured in Firebase Console.';
         } else if (err.message.includes('network')) {
           message = 'Network error. Please check your connection.';
-        } else if (err.message.includes('invalid-oauth')) {
-          message = 'Google OAuth is not properly configured. Please contact support.';
         } else {
-          message = err.message;
+          message = err.message || errorCode;
         }
       }
+      console.error('[OAuth] Google login error:', { code: errorCode, message: err instanceof Error ? err.message : String(err) });
       patch({ loading: false, error: message });
       throw err;
     }
@@ -230,15 +237,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await exchangeToken(credential.user);
     } catch (err: unknown) {
       let message = 'GitHub login failed';
+      let errorCode = '';
       if (err instanceof Error) {
-        if (err.message.includes('popup-closed')) {
+        errorCode = (err as any).code || '';
+        if (errorCode.includes('popup-closed') || err.message.includes('popup-closed')) {
           message = 'GitHub sign-in was cancelled';
+        } else if (errorCode.includes('unauthorized-domain')) {
+          message = 'This domain is not authorized for OAuth. Contact support to add it to Firebase authorized domains.';
         } else if (err.message.includes('redirect_uri_mismatch')) {
-          message = 'GitHub OAuth redirect not configured. Please contact support.';
+          message = 'GitHub OAuth redirect not configured. Configure callback URL: https://readypi-core.firebaseapp.com/__/auth/handler';
         } else {
-          message = err.message;
+          message = err.message || errorCode;
         }
       }
+      console.error('[OAuth] GitHub login error:', { code: errorCode, message: err instanceof Error ? err.message : String(err) });
       patch({ loading: false, error: message });
       throw err;
     }

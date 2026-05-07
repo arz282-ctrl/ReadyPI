@@ -6,7 +6,7 @@
  */
 import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787';
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -106,7 +106,7 @@ export const authAPI = {
    * This bridges Firebase Auth with our Postgres-backed user system.
    */
   firebaseExchange: (firebaseIdToken: string) =>
-    api.post<LoginResponse>('/auth/firebase-exchange', { id_token: firebaseIdToken }),
+    api.post<LoginResponse>('/auth/firebase-exchange', { idToken: firebaseIdToken }),
 };
 
 // ─── Chat endpoints ───────────────────────────────────────────────────────────

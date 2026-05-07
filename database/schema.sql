@@ -11,8 +11,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255), -- Nullable: OAuth users don't have passwords
     full_name VARCHAR(255),
+    avatar_url TEXT, -- Profile picture from OAuth provider
+    oauth_provider VARCHAR(50), -- google.com, github.com, etc.
+    oauth_uid VARCHAR(255), -- Firebase Auth UID
+    last_login TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     email_verified BOOLEAN DEFAULT FALSE,
@@ -23,6 +27,8 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_plan_tier ON users(plan_tier);
+CREATE UNIQUE INDEX idx_users_oauth_provider_uid ON users(oauth_provider, oauth_uid) WHERE oauth_provider IS NOT NULL;
+CREATE INDEX idx_users_last_login ON users(last_login);
 
 -- ============================================================================
 -- API KEYS TABLE

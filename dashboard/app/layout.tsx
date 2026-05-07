@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { AuthProvider } from '@/lib/auth-context'
+import AssistantGate from '@/components/AssistantGate'
 
 export const metadata: Metadata = {
   title: 'ReadyPi — Asia\'s First AI API Gateway | Gemini, GPT-4, Llama',
@@ -37,11 +38,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const assistantEnabled = process.env.NEXT_PUBLIC_ENABLE_ASSISTANT === 'true'
+
   return (
     <html lang="en" className="dark">
       <body className="antialiased">
         <AuthProvider>
           {children}
+          {assistantEnabled ? <AssistantGate /> : null}
         </AuthProvider>
       </body>
     </html>

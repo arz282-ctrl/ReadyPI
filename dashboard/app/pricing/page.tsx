@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Check, Sparkles, Zap } from 'lucide-react'
-import PiMark from '@/components/PiMark'
+import Navbar from '@/components/Navbar'
 import { SectionHeading } from '@/components/ui/motion-sections'
 import { GlowingOrb, RevealOnScroll } from '@/components/ui/motion-primitives'
 import { ElegantShape } from '@/components/ui/shape-landing-hero'
@@ -32,18 +32,10 @@ export default function PricingPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
-      {/* Nav */}
-      <nav className="border-b border-gray-800 bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2"><PiMark variant="logo" withWordmark /></Link>
-          <div className="flex gap-4">
-            <Link href="/signup" className="px-5 py-2.5 bg-gradient-to-r from-[#ff6b4a] to-[#c8381a] text-white font-mono text-xs uppercase rounded-xl hover:shadow-[0_0_30px_rgba(255,107,74,0.4)] transition-all font-bold">Start Free</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
-      <section className="relative py-24 overflow-hidden">
+      <section className="relative pt-28 pb-24 overflow-hidden">
         <GlowingOrb className="-top-20 left-1/4" color="#ff6b4a" size={500} />
         <ElegantShape delay={0.3} width={400} height={100} rotate={12} gradient="from-[#ff6b4a]/[0.08]" className="left-[-5%] top-[20%]" />
         <ElegantShape delay={0.5} width={300} height={80} rotate={-15} gradient="from-[#00ff88]/[0.06]" className="right-[0%] bottom-[10%]" />
@@ -97,7 +89,7 @@ export default function PricingPage() {
                       ))}
                     </ul>
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Link href="/signup" className={`block w-full py-3.5 rounded-xl font-mono text-xs uppercase tracking-wider transition-all font-bold ${plan.popular ? 'bg-gradient-to-r from-[#ff6b4a] to-[#c8381a] text-white hover:shadow-[0_0_30px_rgba(255,107,74,0.5)]' : 'border border-gray-700 text-gray-400 hover:border-[#ff6b4a] hover:text-[#ff6b4a]'}`}>Get Started</Link>
+                      <Link href="/checkout" className={`block w-full py-3.5 rounded-xl font-mono text-xs uppercase tracking-wider transition-all font-bold ${plan.popular ? 'bg-gradient-to-r from-[#ff6b4a] to-[#c8381a] text-white hover:shadow-[0_0_30px_rgba(255,107,74,0.5)]' : 'border border-gray-700 text-gray-400 hover:border-[#ff6b4a] hover:text-[#ff6b4a]'}`}>Get Started</Link>
                     </motion.div>
                   </div>
                 </motion.div>

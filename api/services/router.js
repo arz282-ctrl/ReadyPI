@@ -17,11 +17,6 @@ try {
 class AIRouter {
   constructor() {
     this.providers = {
-      groq: {
-        baseURL: 'https://api.groq.com/openai/v1',
-        apiKey: process.env.GROQ_API_KEY,
-        models: ['llama3-70b-8192', 'llama-3.1-70b-versatile']
-      },
       google: {
         baseURL: 'https://generativelanguage.googleapis.com/v1beta',
         apiKey: process.env.GOOGLE_API_KEY,
@@ -72,6 +67,11 @@ class AIRouter {
           'llama-3-405b-instruct'
         ]
       },
+      fireworks: {
+        baseURL: 'https://api.fireworks.ai/inference/v1',
+        apiKey: process.env.FIREWORKS_API_KEY,
+        models: ['accounts/fireworks/models/llama-v3p3-70b-instruct', 'accounts/fireworks/models/deepseek-v4-pro', 'accounts/fireworks/models/kimi-k2p5']
+      },
       modal: {
         baseURL: 'https://api.us-west-2.modal.direct/v1',
         apiKey: process.env.MODAL_API_KEY,
@@ -102,9 +102,6 @@ class AIRouter {
   async routeRequest({ model, provider, messages, temperature, max_tokens, stream, ...otherParams }) {
     try {
       switch (provider) {
-        case 'groq':
-          return await this.callGroq({ model, messages, temperature, max_tokens, stream });
-        
         case 'google':
           return await this.callGoogle({ model, messages, temperature, max_tokens });
         
@@ -126,6 +123,9 @@ class AIRouter {
         case 'vertex':
           return await this.callVertex({ model, messages, temperature, max_tokens, stream });
         
+        case 'fireworks':
+          return await this.callFireworks({ model, messages, temperature, max_tokens, stream });
+        
         case 'modal':
           return await this.callModal({ model, messages, temperature, max_tokens, stream });
         
@@ -143,33 +143,6 @@ class AIRouter {
       });
       throw error;
     }
-  }
-
-  /**
-   * Call Groq API (Llama models)
-   */
-  async callGroq({ messages, temperature = 0.7, max_tokens = 1024 }) {
-    const response = await axios.post(
-      `${this.providers.groq.baseURL}/chat/completions`,
-      {
-        model: 'llama-3.1-70b-versatile',
-        messages,
-        temperature,
-        max_tokens
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${this.providers.groq.apiKey}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    return {
-      content: response.data.choices[0].message.content,
-      finish_reason: response.data.choices[0].finish_reason,
-      usage: response.data.usage
-    };
   }
 
   /**
@@ -217,16 +190,21 @@ class AIRouter {
   async callOpenAI({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
     const modelMap = {
       'readypi/gpt4o': 'gpt-4o',
-      'readypi/gpt4o-mini': 'gpt-4o-mini'
+      'readypi/gpt4o-mini': 'gpt-4o-mini',
+      'readypi/gpt-5': 'gpt-5',
+      'readypi/gpt-5-mini': 'gpt-5-mini-2025-08-07'
     };
+
+    const targetModel = modelMap[model] || 'gpt-4o-mini';
+    const isGpt5 = targetModel.startsWith('gpt-5');
 
     const response = await axios.post(
       `${this.providers.openai.baseURL}/chat/completions`,
       {
-        model: modelMap[model] || 'gpt-4o-mini',
+        model: targetModel,
         messages,
         temperature,
-        max_tokens
+        ...(isGpt5 ? { max_completion_tokens: max_tokens } : { max_tokens })
       },
       {
         headers: {
@@ -344,15 +322,19 @@ class AIRouter {
    */
   async callOpenRouter({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
     const modelMap = {
-      'readypi/gemini-2.5-flash-free': 'google/gemini-2.0-flash-exp:free',
-      'readypi/llama-3.3-70b-free': 'meta-llama/llama-3.3-70b-instruct:free',
-      'readypi/mistral-nemo-free': 'mistralai/mistral-nemo:free',
-      'readypi/deepseek-r1-free': 'deepseek/deepseek-r1:free',
-      'readypi/qwen-2.5-72b-free': 'qwen/qwen-2.5-72b-instruct:free',
-      'readypi/phi-3-mini-free': 'microsoft/phi-3-mini-128k-instruct:free'
+      'readypi/gemini-2.5-flash-free': 'google/gemini-2.5-flash:free',
+      'readypi/llama-3.3-70b-free':    'meta-llama/llama-3.3-70b-instruct:free',
+      'readypi/mistral-nemo-free':     'mistralai/mistral-nemo:free',
+      'readypi/deepseek-r1-free':      'deepseek/deepseek-r1:free',
+      'readypi/qwen-2.5-72b-free':     'qwen/qwen-2.5-72b-instruct:free',
+      'readypi/phi-3-mini-free':       'microsoft/phi-3-mini-128k-instruct:free',
+      'readypi/nemotron-nano-free':    'nvidia/llama-3.3-nemotron-super-49b-v1:free',
+      'readypi/gpt-oss-120b-free':     'meta-llama/llama-4-maverick:free',
+      'readypi/gemma-4-31b-free':      'google/gemma-3-27b-it:free',
+      'readypi/minimax-m2p5-free':     'qwen/qwen3-235b-a22b:free',
     };
 
-    const targetModel = modelMap[model] || 'google/gemini-2.0-flash-exp:free';
+    const targetModel = modelMap[model] || 'google/gemini-2.5-flash:free';
 
     const response = await axios.post(
       `${this.providers.openrouter.baseURL}/chat/completions`,
@@ -469,6 +451,37 @@ class AIRouter {
         }
       };
     }
+  }
+
+  /**
+   * Call Fireworks AI API (Llama, DeepSeek, Kimi)
+   */
+  async callFireworks({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
+    const modelMap = {
+      'readypi/llama-3.3-70b':    'accounts/fireworks/models/llama-v3p3-70b-instruct',
+      'readypi/llama-3.1-70b':    'accounts/fireworks/models/llama-v3p3-70b-instruct',
+      'readypi/deepseek-v4-pro':  'accounts/fireworks/models/deepseek-v4-pro',
+      'readypi/kimi-k2':          'accounts/fireworks/models/kimi-k2p5',
+    };
+
+    const targetModel = modelMap[model] || 'accounts/fireworks/models/llama-v3p3-70b-instruct';
+
+    const response = await axios.post(
+      `${this.providers.fireworks.baseURL}/chat/completions`,
+      { model: targetModel, messages, temperature, max_tokens },
+      {
+        headers: {
+          'Authorization': `Bearer ${this.providers.fireworks.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return {
+      content: response.data.choices[0].message.content,
+      finish_reason: response.data.choices[0].finish_reason,
+      usage: response.data.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
+    };
   }
 
   /**
