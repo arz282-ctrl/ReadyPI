@@ -35,12 +35,12 @@ router.post('/playground', verifyJWT, async (req, res) => {
     // In this case, we use the same names or map them
     const modelMap = {
       // Free OpenRouter models
-      'google/gemini-2.5-flash:free': 'readypi/gemini-2.5-flash-free',
       'meta-llama/llama-3.3-70b-instruct:free': 'readypi/llama-3.3-70b-free',
-      'deepseek/deepseek-r1:free': 'readypi/deepseek-r1-free',
-      'mistralai/mistral-nemo:free': 'readypi/mistral-nemo-free',
-      'qwen/qwen-2.5-72b-instruct:free': 'readypi/qwen-2.5-72b-free',
-      'microsoft/phi-3-mini-128k-instruct:free': 'readypi/phi-3-mini-free',
+      'google/gemma-4-31b-it:free': 'readypi/gemma-4-31b-free',
+      'nousresearch/hermes-3-llama-3.1-405b:free': 'readypi/hermes-405b-free',
+      'nvidia/nemotron-3-super-120b-a12b:free': 'readypi/nemotron-120b-free',
+      'qwen/qwen3-coder:free': 'readypi/qwen3-coder-free',
+      'minimax/minimax-m2.5:free': 'readypi/minimax-m2.5-free',
       // Trial models (use credits)
       'deepseek/deepseek-chat': 'readypi/deepseek',
       'google/gemini-1.5-flash': 'readypi/gemini-flash',

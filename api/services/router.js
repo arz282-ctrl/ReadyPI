@@ -46,12 +46,12 @@ class AIRouter {
         baseURL: 'https://openrouter.ai/api/v1',
         apiKey: process.env.OPENROUTER_API_KEY,
         models: [
-          'google/gemini-2.5-flash:free',
           'meta-llama/llama-3.3-70b-instruct:free',
-          'mistralai/mistral-nemo:free',
-          'deepseek/deepseek-r1:free',
-          'qwen/qwen-2.5-72b-instruct:free',
-          'microsoft/phi-3-mini-128k-instruct:free'
+          'google/gemma-4-31b-it:free',
+          'nousresearch/hermes-3-llama-3.1-405b:free',
+          'nvidia/nemotron-3-super-120b-a12b:free',
+          'qwen/qwen3-coder:free',
+          'minimax/minimax-m2.5:free'
         ]
       },
       vertex: {
@@ -327,16 +327,12 @@ class AIRouter {
    */
   async callOpenRouter({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
     const modelMap = {
-      'readypi/gemini-2.5-flash-free': 'google/gemini-2.5-flash:free',
       'readypi/llama-3.3-70b-free':    'meta-llama/llama-3.3-70b-instruct:free',
-      'readypi/mistral-nemo-free':     'mistralai/mistral-nemo:free',
-      'readypi/deepseek-r1-free':      'deepseek/deepseek-r1:free',
-      'readypi/qwen-2.5-72b-free':     'qwen/qwen-2.5-72b-instruct:free',
-      'readypi/phi-3-mini-free':       'microsoft/phi-3-mini-128k-instruct:free',
-      'readypi/nemotron-nano-free':    'nvidia/llama-3.3-nemotron-super-49b-v1:free',
-      'readypi/gpt-oss-120b-free':     'meta-llama/llama-4-maverick:free',
-      'readypi/gemma-4-31b-free':      'google/gemma-3-27b-it:free',
-      'readypi/minimax-m2p5-free':     'qwen/qwen3-235b-a22b:free',
+      'readypi/gemma-4-31b-free':      'google/gemma-4-31b-it:free',
+      'readypi/hermes-405b-free':      'nousresearch/hermes-3-llama-3.1-405b:free',
+      'readypi/nemotron-120b-free':    'nvidia/nemotron-3-super-120b-a12b:free',
+      'readypi/qwen3-coder-free':      'qwen/qwen3-coder:free',
+      'readypi/minimax-m2.5-free':     'minimax/minimax-m2.5:free',
     };
 
     const targetModel = modelMap[model] || 'google/gemini-2.5-flash:free';
