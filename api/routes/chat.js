@@ -60,15 +60,15 @@ router.post('/playground', verifyJWT, async (req, res) => {
     }
 
     const modelPricing = pricingResult.rows[0];
+    const isFreeModel = modelPricing.is_free_tier && parseFloat(modelPricing.cost_per_1m_tokens_bdt) === 0;
 
-    // 4. Estimate & Check credits
-    // Pricing: minimum 5 BDT per request + 1 credit per 100 tokens
-    // This ensures 50 free BDT lasts ~5-10 requests
+    // 4. Estimate & Check credits (skip for free models)
     const promptTokens = tokenizer.countTokens(messages);
-    const estimatedCredits = Math.max(5, Math.ceil((promptTokens + (max_tokens || 1000)) / 100));
-
-    if (currentBalance < estimatedCredits) {
-      return res.status(402).json({ error: 'Insufficient credits' });
+    if (!isFreeModel) {
+      const estimatedCredits = Math.max(5, Math.ceil((promptTokens + (max_tokens || 1000)) / 100));
+      if (currentBalance < estimatedCredits) {
+        return res.status(402).json({ error: 'Insufficient credits' });
+      }
     }
 
     // 5. Route request
@@ -82,21 +82,22 @@ router.post('/playground', verifyJWT, async (req, res) => {
     });
 
     // 6. Calculate actual usage
-    // Pricing: min 5 BDT + 1 credit per 100 tokens (50 BDT ≈ 5-10 requests)
     const completionTokens = aiResponse.usage?.completion_tokens || tokenizer.countTokens([{ role: 'assistant', content: aiResponse.content }]);
     const totalTokens = promptTokens + completionTokens;
-    const creditsUsed = Math.max(5, Math.ceil(totalTokens / 100));
-    const costBdt = creditsUsed; // 1 credit = 1 BDT
+    const creditsUsed = isFreeModel ? 0 : Math.max(5, Math.ceil(totalTokens / 100));
+    const costBdt = creditsUsed;
 
     // 7. Record usage & Deduct credits
     await db.transaction(async (client) => {
-      await client.query(
-        'UPDATE credits SET balance = balance - $1, total_used = total_used + $1 WHERE user_id = $2',
-        [creditsUsed, req.user.id]
-      );
+      if (!isFreeModel) {
+        await client.query(
+          'UPDATE credits SET balance = balance - $1, total_used = total_used + $1 WHERE user_id = $2',
+          [creditsUsed, req.user.id]
+        );
+      }
 
       await client.query(
-        `INSERT INTO usage_logs 
+        `INSERT INTO usage_logs
         (user_id, model, provider, prompt_tokens, completion_tokens, total_tokens, credits_used, cost_bdt, request_id, status, latency_ms)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [req.user.id, backendModel, modelPricing.provider, promptTokens, completionTokens, totalTokens, creditsUsed, costBdt, requestId, 'success', Date.now() - startTime]
@@ -108,7 +109,8 @@ router.post('/playground', verifyJWT, async (req, res) => {
       usage: {
         total_tokens: totalTokens,
         credits_used: creditsUsed,
-        cost_bdt: costBdt
+        cost_bdt: costBdt,
+        is_free: isFreeModel
       },
       latency_ms: Date.now() - startTime
     });
@@ -179,6 +181,7 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
     }
 
     const modelPricing = pricingResult.rows[0];
+    const isFreeModel = modelPricing.is_free_tier && parseFloat(modelPricing.cost_per_1m_tokens_bdt) === 0;
 
     // Check if model is allowed on user's plan
     if (req.apiKey.planTier === 'free' && !modelPricing.is_free_tier) {
@@ -195,22 +198,23 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
     // Estimate prompt tokens
     const promptTokens = tokenizer.countTokens(messages);
 
-    // Estimate credits needed (min 5 BDT + 1 per 100 tokens)
-    const estimatedTotalTokens = promptTokens + (max_tokens || 1000);
-    const estimatedCredits = Math.max(5, Math.ceil(estimatedTotalTokens / 100));
+    // Check credit balance (skip for free models)
+    if (!isFreeModel) {
+      const estimatedTotalTokens = promptTokens + (max_tokens || 1000);
+      const estimatedCredits = Math.max(5, Math.ceil(estimatedTotalTokens / 100));
 
-    // Check credit balance
-    if (req.apiKey.creditBalance < estimatedCredits) {
-      return res.status(402).json({
-        error: {
-          message: `Insufficient credits. Required: ${estimatedCredits}, Available: ${req.apiKey.creditBalance}`,
-          type: 'insufficient_quota',
-          code: 'insufficient_credits',
-          credits_required: estimatedCredits,
-          credits_available: req.apiKey.creditBalance,
-          top_up_url: 'https://readypi.io/dashboard/credits'
-        }
-      });
+      if (req.apiKey.creditBalance < estimatedCredits) {
+        return res.status(402).json({
+          error: {
+            message: `Insufficient credits. Required: ${estimatedCredits}, Available: ${req.apiKey.creditBalance}`,
+            type: 'insufficient_quota',
+            code: 'insufficient_credits',
+            credits_required: estimatedCredits,
+            credits_available: req.apiKey.creditBalance,
+            top_up_url: 'https://readypi.io/dashboard/credits'
+          }
+        });
+      }
     }
 
     // Route request to appropriate AI provider
@@ -232,23 +236,22 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
       ...otherParams
     });
 
-    // Calculate actual tokens used (min 5 BDT + 1 per 100 tokens)
     const completionTokens = aiResponse.usage?.completion_tokens || tokenizer.countTokens([{ role: 'assistant', content: aiResponse.content }]);
     const totalTokens = promptTokens + completionTokens;
-    const creditsUsed = Math.max(5, Math.ceil(totalTokens / 100));
-    const costBdt = creditsUsed; // 1 credit = 1 BDT
+    const creditsUsed = isFreeModel ? 0 : Math.max(5, Math.ceil(totalTokens / 100));
+    const costBdt = creditsUsed;
 
-    // Deduct credits in transaction
+    // Deduct credits and log usage
     await db.transaction(async (client) => {
-      // Deduct credits
-      await client.query(
-        'UPDATE credits SET balance = balance - $1, total_used = total_used + $1 WHERE user_id = $2',
-        [creditsUsed, req.apiKey.userId]
-      );
+      if (!isFreeModel) {
+        await client.query(
+          'UPDATE credits SET balance = balance - $1, total_used = total_used + $1 WHERE user_id = $2',
+          [creditsUsed, req.apiKey.userId]
+        );
+      }
 
-      // Log usage
       await client.query(
-        `INSERT INTO usage_logs 
+        `INSERT INTO usage_logs
         (user_id, api_key_id, model, provider, prompt_tokens, completion_tokens, total_tokens, credits_used, cost_bdt, request_id, status, latency_ms)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
