@@ -180,9 +180,11 @@ function PlaygroundContent() {
                   <option value="minimax/minimax-m2.5:free">MiniMax M2.5 (Free)</option>
                 </optgroup>
                 <optgroup label="Trial Models — Uses Credits">
-                  <option value="google/gemini-1.5-flash">Gemini 1.5 Flash — ৳0.30/1M tokens</option>
-                  <option value="mixtral-8x7b">Mistral Small — ৳0.70/1M tokens</option>
+                  <option value="google/gemini-2.0-flash">Gemini 2.0 Flash — ৳0.30/1M tokens</option>
                   <option value="deepseek/deepseek-chat">DeepSeek V3 — ৳0.90/1M tokens</option>
+                  <option value="openai/gpt-5-mini">GPT-5 Mini — ৳0.60/1M tokens</option>
+                  <option value="openai/gpt-5">GPT-5 — ৳10.00/1M tokens</option>
+                  <option value="openai/gpt-5.1-codex-mini">GPT-5.1 Codex Mini — ৳3.00/1M tokens</option>
                 </optgroup>
               </select>
             </div>
