@@ -20,17 +20,17 @@ class AIRouter {
       google: {
         baseURL: 'https://generativelanguage.googleapis.com/v1beta',
         apiKey: process.env.GOOGLE_API_KEY,
-        models: ['gemini-1.5-flash', 'gemini-1.5-pro']
+        models: ['gemini-2.0-flash', 'gemini-2.5-flash']
       },
       openai: {
         baseURL: 'https://api.openai.com/v1',
         apiKey: process.env.OPENAI_API_KEY,
-        models: ['gpt-4o', 'gpt-4o-mini']
+        models: ['gpt-5', 'gpt-5-mini-2025-08-07', 'gpt-5.1-codex-mini']
       },
       anthropic: {
         baseURL: 'https://api.anthropic.com/v1',
         apiKey: process.env.ANTHROPIC_API_KEY,
-        models: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022']
+        models: ['claude-sonnet-4-6-20250514', 'claude-haiku-4-5-20251001']
       },
       deepseek: {
         baseURL: 'https://api.deepseek.com/v1',
@@ -150,10 +150,10 @@ class AIRouter {
    */
   async callGoogle({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
     const modelMap = {
-      'readypi/gemini-flash': 'gemini-1.5-flash',
-      'readypi/gemini-pro': 'gemini-1.5-pro',
+      'readypi/gemini-flash': 'gemini-2.0-flash',
+      'readypi/gemini-pro': 'gemini-2.5-flash',
     };
-    const targetModel = modelMap[model] || 'gemini-1.5-flash';
+    const targetModel = modelMap[model] || 'gemini-2.0-flash';
 
     const contents = messages.map(msg => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
@@ -194,14 +194,15 @@ class AIRouter {
    */
   async callOpenAI({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
     const modelMap = {
-      'readypi/gpt4o': 'gpt-4o',
-      'readypi/gpt4o-mini': 'gpt-4o-mini',
+      'readypi/gpt4o': 'gpt-5',
+      'readypi/gpt4o-mini': 'gpt-5-mini-2025-08-07',
       'readypi/gpt-5': 'gpt-5',
-      'readypi/gpt-5-mini': 'gpt-5-mini-2025-08-07'
+      'readypi/gpt-5-mini': 'gpt-5-mini-2025-08-07',
+      'readypi/gpt-5.1-codex-mini': 'gpt-5.1-codex-mini'
     };
 
-    const targetModel = modelMap[model] || 'gpt-4o-mini';
-    const isGpt5 = targetModel.startsWith('gpt-5');
+    const targetModel = modelMap[model] || 'gpt-5-mini-2025-08-07';
+    const isGpt5 = true;
 
     const response = await axios.post(
       `${this.providers.openai.baseURL}/chat/completions`,
@@ -231,8 +232,8 @@ class AIRouter {
    */
   async callAnthropic({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
     const modelMap = {
-      'readypi/claude-sonnet': 'claude-3-5-sonnet-20241022',
-      'readypi/claude-haiku': 'claude-3-5-haiku-20241022'
+      'readypi/claude-sonnet': 'claude-sonnet-4-6-20250514',
+      'readypi/claude-haiku': 'claude-haiku-4-5-20251001'
     };
 
     // Extract system message if present
@@ -242,7 +243,7 @@ class AIRouter {
     const response = await axios.post(
       `${this.providers.anthropic.baseURL}/messages`,
       {
-        model: modelMap[model] || 'claude-3-5-haiku-20241022',
+        model: modelMap[model] || 'claude-haiku-4-5-20251001',
         messages: userMessages,
         system: systemMessage?.content,
         temperature,

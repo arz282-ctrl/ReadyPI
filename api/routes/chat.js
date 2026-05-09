@@ -43,8 +43,11 @@ router.post('/playground', verifyJWT, async (req, res) => {
       'minimax/minimax-m2.5:free': 'readypi/minimax-m2.5-free',
       // Trial models (use credits)
       'deepseek/deepseek-chat': 'readypi/deepseek',
-      'google/gemini-1.5-flash': 'readypi/gemini-flash',
+      'google/gemini-2.0-flash': 'readypi/gemini-flash',
       'mixtral-8x7b': 'readypi/mistral',
+      'openai/gpt-5': 'readypi/gpt-5',
+      'openai/gpt-5-mini': 'readypi/gpt-5-mini',
+      'openai/gpt-5.1-codex-mini': 'readypi/gpt-5.1-codex-mini',
     };
 
     const backendModel = modelMap[model] || model;
@@ -168,13 +171,12 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
           code: 'model_not_found',
           available_models: [
             'readypi/deepseek',
-            'readypi/llama',
             'readypi/gemini-flash',
-            'readypi/gpt4o-mini',
+            'readypi/gpt-5',
+            'readypi/gpt-5-mini',
+            'readypi/gpt-5.1-codex-mini',
             'readypi/claude-haiku',
-            'readypi/mistral',
-            'readypi/claude-sonnet',
-            'readypi/gpt4o'
+            'readypi/claude-sonnet'
           ]
         }
       });
