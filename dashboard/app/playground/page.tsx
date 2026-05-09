@@ -166,59 +166,23 @@ function PlaygroundContent() {
                 Model
                 <Link href="/models" className="text-[#FF4500] hover:underline normal-case tracking-normal">View all</Link>
               </label>
-              <select 
+              <select
                 value={model}
                 onChange={e => setModel(e.target.value)}
                 className="w-full bg-[#050508] border border-gray-800 rounded p-2 text-sm text-white focus:outline-none focus:border-[#FF4500]/50"
               >
                 <optgroup label="Free Models — No Credits Required">
                   <option value="google/gemini-2.5-flash:free">Gemini 2.5 Flash (Free)</option>
-                  <option value="google/gemini-2.5-flash-preview-05-20:free">Gemini 2.5 Flash Preview (Free)</option>
                   <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
                   <option value="deepseek/deepseek-r1:free">DeepSeek R1 (Free)</option>
                   <option value="mistralai/mistral-nemo:free">Mistral Nemo (Free)</option>
                   <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
                   <option value="microsoft/phi-3-mini-128k-instruct:free">Phi-3 Mini (Free)</option>
                 </optgroup>
-                <optgroup label="DeepSeek">
-                  <option value="deepseek/deepseek-chat">DeepSeek V3</option>
-                  <option value="deepseek/deepseek-reasoner">DeepSeek R1 (Full)</option>
-                </optgroup>
-                <optgroup label="Groq">
-                  <option value="meta-llama/llama-3-70b-instruct">Llama 3 70B (Fastest)</option>
-                  <option value="mixtral-8x7b">Mixtral 8x7B</option>
-                </optgroup>
-                <optgroup label="Google">
-                  <option value="google/gemini-1.5-flash">Gemini 1.5 Flash (1M Context)</option>
-                  <option value="google/gemini-1.5-pro">Gemini 1.5 Pro</option>
-                </optgroup>
-                <optgroup label="Anthropic">
-                  <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                </optgroup>
-                <optgroup label="AWS Bedrock — Amazon">
-                  <option value="bedrock/nova-micro">Nova Micro (Fastest)</option>
-                  <option value="bedrock/nova-lite">Nova Lite</option>
-                  <option value="bedrock/nova-pro">Nova Pro</option>
-                  <option value="bedrock/titan">Titan Express</option>
-                </optgroup>
-                <optgroup label="AWS Bedrock — Anthropic">
-                  <option value="bedrock/claude-haiku-3">Claude 3 Haiku</option>
-                  <option value="bedrock/claude-haiku">Claude 3.5 Haiku</option>
-                  <option value="bedrock/claude-sonnet">Claude 3.5 Sonnet</option>
-                </optgroup>
-                <optgroup label="AWS Bedrock — Meta">
-                  <option value="bedrock/llama-8b">Llama 3.1 8B</option>
-                  <option value="bedrock/llama-70b">Llama 3.1 70B</option>
-                </optgroup>
-                <optgroup label="AWS Bedrock — Mistral">
-                  <option value="bedrock/mistral-7b">Mistral 7B</option>
-                  <option value="bedrock/mixtral">Mixtral 8x7B</option>
-                </optgroup>
-                <optgroup label="AWS Bedrock — Moonshot">
-                  <option value="readypi/bedrock-moonshot.kimi-k2-thinking">Kimi K2 Thinking</option>
-                </optgroup>
-                <optgroup label="AWS Bedrock — MiniMax">
-                  <option value="readypi/bedrock-minimax.m2">MiniMax M2</option>
+                <optgroup label="Trial Models — Uses Credits">
+                  <option value="google/gemini-1.5-flash">Gemini 1.5 Flash — ৳0.30/1M tokens</option>
+                  <option value="mixtral-8x7b">Mistral Small — ৳0.70/1M tokens</option>
+                  <option value="deepseek/deepseek-chat">DeepSeek V3 — ৳0.90/1M tokens</option>
                 </optgroup>
               </select>
             </div>

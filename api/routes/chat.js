@@ -34,24 +34,17 @@ router.post('/playground', verifyJWT, async (req, res) => {
     // 2. Map frontend model names to backend model IDs if needed
     // In this case, we use the same names or map them
     const modelMap = {
-      'meta-llama/llama-3-70b-instruct': 'readypi/llama',
+      // Free OpenRouter models
+      'google/gemini-2.5-flash:free': 'readypi/gemini-2.5-flash-free',
+      'meta-llama/llama-3.3-70b-instruct:free': 'readypi/llama-3.3-70b-free',
+      'deepseek/deepseek-r1:free': 'readypi/deepseek-r1-free',
+      'mistralai/mistral-nemo:free': 'readypi/mistral-nemo-free',
+      'qwen/qwen-2.5-72b-instruct:free': 'readypi/qwen-2.5-72b-free',
+      'microsoft/phi-3-mini-128k-instruct:free': 'readypi/phi-3-mini-free',
+      // Trial models (use credits)
+      'deepseek/deepseek-chat': 'readypi/deepseek',
       'google/gemini-1.5-flash': 'readypi/gemini-flash',
-      'google/gemini-1.5-pro': 'readypi/gemini-pro',
-      'anthropic/claude-3.5-sonnet': 'readypi/claude-sonnet',
       'mixtral-8x7b': 'readypi/mistral',
-      'zai-org/glm-5.1': 'readypi/glm-5.1',
-      // AWS Bedrock models
-      'bedrock/nova-micro': 'readypi/bedrock-nova-micro',
-      'bedrock/nova-lite': 'readypi/bedrock-nova-lite',
-      'bedrock/nova-pro': 'readypi/bedrock-nova-pro',
-      'bedrock/titan': 'readypi/bedrock-titan',
-      'bedrock/llama-8b': 'readypi/bedrock-llama-8b',
-      'bedrock/llama-70b': 'readypi/bedrock-llama-70b',
-      'bedrock/mistral-7b': 'readypi/bedrock-mistral-7b',
-      'bedrock/mixtral': 'readypi/bedrock-mixtral',
-      'bedrock/claude-haiku-3': 'readypi/bedrock-claude-haiku-3',
-      'bedrock/claude-haiku': 'readypi/bedrock-claude-haiku',
-      'bedrock/claude-sonnet': 'readypi/bedrock-claude-sonnet',
     };
 
     const backendModel = modelMap[model] || model;
