@@ -148,15 +148,20 @@ class AIRouter {
   /**
    * Call Google AI (Gemini models)
    */
-  async callGoogle({ messages, temperature = 0.7, max_tokens = 1024 }) {
-    // Convert OpenAI format to Gemini format
+  async callGoogle({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
+    const modelMap = {
+      'readypi/gemini-flash': 'gemini-1.5-flash',
+      'readypi/gemini-pro': 'gemini-1.5-pro',
+    };
+    const targetModel = modelMap[model] || 'gemini-1.5-flash';
+
     const contents = messages.map(msg => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.content }]
     }));
 
     const response = await axios.post(
-      `${this.providers.google.baseURL}/models/gemini-1.5-flash:generateContent?key=${this.providers.google.apiKey}`,
+      `${this.providers.google.baseURL}/models/${targetModel}:generateContent?key=${this.providers.google.apiKey}`,
       {
         contents,
         generationConfig: {
