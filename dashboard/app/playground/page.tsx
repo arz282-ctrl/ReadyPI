@@ -21,7 +21,7 @@ function PlaygroundContent() {
   const [systemPrompt, setSystemPrompt] = useState('You are a helpful AI assistant connected via ReadyPi.')
   const [chatInput, setChatInput] = useState('')
   const [isSending, setIsSending] = useState(false)
-  const [model, setModel] = useState('google/gemini-2.5-flash:free')
+  const [model, setModel] = useState('meta-llama/llama-3.3-70b-instruct:free')
   const [temp, setTemp] = useState(0.7)
   const [maxTokens, setMaxTokens] = useState(1024)
   const [messages, setMessages] = useState<Message[]>([
@@ -172,12 +172,12 @@ function PlaygroundContent() {
                 className="w-full bg-[#050508] border border-gray-800 rounded p-2 text-sm text-white focus:outline-none focus:border-[#FF4500]/50"
               >
                 <optgroup label="Free Models — No Credits Required">
-                  <option value="google/gemini-2.5-flash:free">Gemini 2.5 Flash (Free)</option>
                   <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
-                  <option value="deepseek/deepseek-r1:free">DeepSeek R1 (Free)</option>
-                  <option value="mistralai/mistral-nemo:free">Mistral Nemo (Free)</option>
-                  <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
-                  <option value="microsoft/phi-3-mini-128k-instruct:free">Phi-3 Mini (Free)</option>
+                  <option value="google/gemma-4-31b-it:free">Gemma 4 31B (Free)</option>
+                  <option value="nousresearch/hermes-3-llama-3.1-405b:free">Hermes 3 405B (Free)</option>
+                  <option value="nvidia/nemotron-3-super-120b-a12b:free">Nemotron 3 Super 120B (Free)</option>
+                  <option value="qwen/qwen3-coder:free">Qwen 3 Coder (Free)</option>
+                  <option value="minimax/minimax-m2.5:free">MiniMax M2.5 (Free)</option>
                 </optgroup>
                 <optgroup label="Trial Models — Uses Credits">
                   <option value="google/gemini-1.5-flash">Gemini 1.5 Flash — ৳0.30/1M tokens</option>
