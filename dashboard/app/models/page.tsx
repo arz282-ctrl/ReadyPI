@@ -257,15 +257,11 @@ const models: Model[] = [
   { id: 'accounts/fireworks/models/qwen2-vl-72b-instruct', name: 'Qwen 2 VL 72B (Fireworks)', provider: 'Qwen', via: 'Fireworks', context: '32K', promptPrice: 0.50, completionPrice: 0.50, latency: '0.5s', isFree: false, features: ['Vision', 'Text'] },
 ]
 
-const providerOptions = [
-  'All Providers', 'OpenAI', 'Anthropic', 'Google', 'Meta', 'DeepSeek', 'Qwen',
-  'Mistral', 'NVIDIA', 'Microsoft', 'Moonshot', 'MiniMax', 'xAI', 'Cohere',
-  'Perplexity', 'Amazon', 'ByteDance', 'Kling', 'Groq', 'Hugging Face', 'Stability', 'BFL',
-]
+const providerOptions = ['All Providers', ...Array.from(new Set(models.map(m => m.provider))).sort()]
 
-const viaOptions = ['All Routes', 'Direct', 'OpenRouter', 'Fireworks', 'Modal']
+const viaOptions = ['All Routes', ...Array.from(new Set(models.map(m => m.via))).sort()]
 
-const featureOptions = ['All', 'Text', 'Vision', 'Code', 'Reasoning', 'Tools', 'Image Gen', 'Video Gen', 'Embedding', 'Audio', 'TTS', 'STT', 'Fast', 'Creative', 'Search', 'RAG', 'HD']
+const featureOptions = ['All', ...Array.from(new Set(models.flatMap(m => m.features))).sort()]
 
 export default function ModelsPage() {
   const [search, setSearch] = useState('')
@@ -462,8 +458,8 @@ export default function ModelsPage() {
                       </div>
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      <Link 
-                        href={`/playground?model=${encodeURIComponent(model.id)}`} 
+                      <Link
+                        href={`/playground?model=${encodeURIComponent(model.id)}`}
                         className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-gray-600 hover:text-[#ff6b4a] transition-colors opacity-0 group-hover:opacity-100"
                       >
                         <Play size={10} /> Test

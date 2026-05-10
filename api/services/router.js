@@ -153,7 +153,7 @@ class AIRouter {
       'readypi/gemini-flash': 'gemini-2.0-flash',
       'readypi/gemini-pro': 'gemini-2.5-flash',
     };
-    const targetModel = modelMap[model] || 'gemini-2.0-flash';
+    const targetModel = modelMap[model] || model;
 
     const contents = messages.map(msg => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
@@ -201,8 +201,8 @@ class AIRouter {
       'readypi/gpt-5.1-codex-mini': 'gpt-5.1-codex-mini'
     };
 
-    const targetModel = modelMap[model] || 'gpt-5-mini-2025-08-07';
-    const isGpt5 = true;
+    const targetModel = modelMap[model] || model;
+    const isGpt5 = targetModel.startsWith('gpt-5') || targetModel.startsWith('gpt-4.1') || targetModel.startsWith('o');
 
     const response = await axios.post(
       `${this.providers.openai.baseURL}/chat/completions`,
@@ -243,7 +243,7 @@ class AIRouter {
     const response = await axios.post(
       `${this.providers.anthropic.baseURL}/messages`,
       {
-        model: modelMap[model] || 'claude-haiku-4-5-20251001',
+        model: modelMap[model] || model,
         messages: userMessages,
         system: systemMessage?.content,
         temperature,
@@ -272,11 +272,11 @@ class AIRouter {
   /**
    * Call DeepSeek API
    */
-  async callDeepSeek({ messages, temperature = 0.7, max_tokens = 1024 }) {
+  async callDeepSeek({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
     const response = await axios.post(
       `${this.providers.deepseek.baseURL}/chat/completions`,
       {
-        model: 'deepseek-chat',
+        model: model || 'deepseek-chat',
         messages,
         temperature,
         max_tokens
@@ -299,11 +299,11 @@ class AIRouter {
   /**
    * Call Mistral API
    */
-  async callMistral({ messages, temperature = 0.7, max_tokens = 1024 }) {
+  async callMistral({ model, messages, temperature = 0.7, max_tokens = 1024 }) {
     const response = await axios.post(
       `${this.providers.mistral.baseURL}/chat/completions`,
       {
-        model: 'mistral-small-latest',
+        model: model || 'mistral-small-latest',
         messages,
         temperature,
         max_tokens
@@ -336,7 +336,7 @@ class AIRouter {
       'readypi/minimax-m2.5-free':     'minimax/minimax-m2.5:free',
     };
 
-    const targetModel = modelMap[model] || 'google/gemini-2.5-flash:free';
+    const targetModel = modelMap[model] || model;
 
     const response = await axios.post(
       `${this.providers.openrouter.baseURL}/chat/completions`,
@@ -466,7 +466,7 @@ class AIRouter {
       'readypi/kimi-k2':          'accounts/fireworks/models/kimi-k2p5',
     };
 
-    const targetModel = modelMap[model] || 'accounts/fireworks/models/llama-v3p3-70b-instruct';
+    const targetModel = modelMap[model] || model;
 
     const response = await axios.post(
       `${this.providers.fireworks.baseURL}/chat/completions`,
@@ -495,7 +495,7 @@ class AIRouter {
       'readypi/glm-5.1': 'zai-org/GLM-5.1-FP8'
     };
 
-    const targetModel = modelMap[model] || 'zai-org/GLM-5.1-FP8';
+    const targetModel = modelMap[model] || model;
 
     const response = await axios.post(
       `${this.providers.modal.baseURL}/chat/completions`,
