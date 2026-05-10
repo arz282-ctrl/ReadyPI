@@ -31,23 +31,27 @@ router.post('/playground', verifyJWT, async (req, res) => {
 
     const currentBalance = parseInt(creditResult.rows[0].balance);
 
-    // 2. Map frontend model names to backend model IDs if needed
-    // In this case, we use the same names or map them
+    // 2. Map frontend model names to backend readypi/ IDs
+    // Playground now sends readypi/ IDs directly, but keep legacy mappings for backward compat
     const modelMap = {
-      // Free OpenRouter models
+      // Legacy playground IDs (OpenRouter format)
       'meta-llama/llama-3.3-70b-instruct:free': 'readypi/llama-3.3-70b-free',
       'google/gemma-4-31b-it:free': 'readypi/gemma-4-31b-free',
       'nousresearch/hermes-3-llama-3.1-405b:free': 'readypi/hermes-405b-free',
       'nvidia/nemotron-3-super-120b-a12b:free': 'readypi/nemotron-120b-free',
       'qwen/qwen3-coder:free': 'readypi/qwen3-coder-free',
       'minimax/minimax-m2.5:free': 'readypi/minimax-m2.5-free',
-      // Trial models (use credits)
+      // Legacy trial model IDs
       'deepseek/deepseek-chat': 'readypi/deepseek',
-      'google/gemini-1.5-flash': 'readypi/gemini-flash',
+      'google/gemini-2.0-flash': 'readypi/gemini-flash',
       'mixtral-8x7b': 'readypi/mistral',
+      'openai/gpt-5': 'readypi/gpt-5',
+      'openai/gpt-5-mini': 'readypi/gpt-5-mini',
+      'openai/gpt-5.1-codex-mini': 'readypi/gpt-5.1-codex-mini',
     };
 
-    const backendModel = modelMap[model] || model;
+    // readypi/ IDs pass through directly, otherwise map
+    const backendModel = model.startsWith('readypi/') ? model : (modelMap[model] || model);
 
     // 3. Get pricing
     const pricingResult = await db.query(
@@ -168,13 +172,12 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
           code: 'model_not_found',
           available_models: [
             'readypi/deepseek',
-            'readypi/llama',
             'readypi/gemini-flash',
-            'readypi/gpt4o-mini',
+            'readypi/gpt-5',
+            'readypi/gpt-5-mini',
+            'readypi/gpt-5.1-codex-mini',
             'readypi/claude-haiku',
-            'readypi/mistral',
-            'readypi/claude-sonnet',
-            'readypi/gpt4o'
+            'readypi/claude-sonnet'
           ]
         }
       });
