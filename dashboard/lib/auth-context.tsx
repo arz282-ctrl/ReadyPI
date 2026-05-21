@@ -372,12 +372,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Refresh profile in background for freshness
           authAPI.me()
             .then(({ data }) => patch({ user: data }))
-            .catch(() => {
-              // Token expired — clear everything including cookie
-              localStorage.removeItem('readypi_token');
-              localStorage.removeItem('readypi_user');
-              document.cookie = 'readypi_session=; path=/; max-age=0';
-              patch({ user: null, token: null });
+            .catch((err: any) => {
+              // Token expired/invalid — clear everything including cookie ONLY if it is an auth error
+              if (err?.response?.status === 401 || err?.response?.status === 403) {
+                localStorage.removeItem('readypi_token');
+                localStorage.removeItem('readypi_user');
+                document.cookie = 'readypi_session=; path=/; max-age=0';
+                patch({ user: null, token: null });
+              } else {
+                console.warn('Background profile refresh failed due to network/server issue:', err);
+              }
             });
           return;
         } catch {

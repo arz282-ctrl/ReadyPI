@@ -7,7 +7,7 @@
  * Right panel (Pi Mark) remains unchanged.
  */
 
-import { useState, useCallback, ChangeEvent, FormEvent } from 'react';
+import { useState, useCallback, ChangeEvent, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -17,7 +17,18 @@ import PiMark from '@/components/PiMark';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { loginWithEmail, loginWithGoogle, loginWithGithub, loginWithFacebook, loginWithApple, sendPhoneCode, verifyPhoneCode, loading, error, clearError } = useAuth();
+  const { loginWithEmail, loginWithGoogle, loginWithGithub, loginWithFacebook, loginWithApple, sendPhoneCode, verifyPhoneCode, loading, error, clearError, user } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) {
+      let redirectTo = '/dashboard';
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        redirectTo = params.get('redirect') || '/dashboard';
+      }
+      router.push(redirectTo);
+    }
+  }, [user, loading, router]);
 
   const [identifier, setIdentifier] = useState('');
   const [passphrase, setPassphrase] = useState('');
