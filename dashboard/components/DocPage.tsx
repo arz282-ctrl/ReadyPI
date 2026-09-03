@@ -69,7 +69,7 @@ export default function DocPage({
       </article>
 
       <footer className="px-8 py-6 border-t border-gray-900 text-center font-mono text-[10px] uppercase tracking-wider text-gray-600">
-        © 2026 ReadyPi · Sylhet, Bangladesh
+        © 2026 ReadyPi · Mumbai, India
       </footer>
     </main>
   );

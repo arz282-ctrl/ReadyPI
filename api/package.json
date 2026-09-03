@@ -1,7 +1,7 @@
 {
   "name": "readypi-api",
   "version": "1.0.0",
-  "description": "ReadyPi AI API Aggregation Platform - Bangladesh's first AI gateway with bKash/Nagad payment",
+  "description": "ReadyPi AI API Aggregation Platform - India's first AI gateway with UPI/Razorpay payment",
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
@@ -49,7 +49,6 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
-    "firebase-admin": "^13.8.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",

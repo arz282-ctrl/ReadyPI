@@ -142,7 +142,7 @@ router.post('/login', authRateLimiter, async (req, res) => {
     if (!user.is_active) {
       return res.status(403).json({
         error: 'Account deactivated',
-        message: 'Your account has been deactivated. Contact support@readypi.io'
+        message: 'Your account has been deactivated. Contact support@readypi.site'
       });
     }
 
@@ -253,8 +253,8 @@ router.post('/logout', verifyJWT, (req, res) => {
   });
 });
 
-// Register Firebase Auth token exchange route
-const firebaseExchange = require('./firebase-exchange');
-firebaseExchange.register(router);
+// Register Supabase Auth token exchange route (primary)
+const supabaseExchange = require('./supabase-exchange');
+supabaseExchange.register(router);
 
 module.exports = router;

@@ -19,7 +19,7 @@ from openai import OpenAI
 
 # Drop-in compatibility: Just change the base URL and API key
 client = OpenAI(
-  base_url="https://api.readypi.io/v1",
+  base_url="https://api.readypi.online/v1",
   api_key="${apiKey}"
 )
 
@@ -36,7 +36,7 @@ print(completion.choices[0].message.content)`
   const nodeCode = `import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  baseURL: 'https://api.readypi.io/v1',
+  baseURL: 'https://api.readypi.online/v1',
   apiKey: '${apiKey}'
 });
 
@@ -171,7 +171,7 @@ main();`
             </h2>
             <div className="flex items-center gap-3 mb-4">
               <span className="bg-green-500/20 text-green-500 px-2 py-1 rounded border border-green-500/30 text-xs font-bold uppercase tracking-wider">POST</span>
-              <code className="text-gray-300">https://api.readypi.io/v1/chat/completions</code>
+              <code className="text-gray-300">https://api.readypi.online/v1/chat/completions</code>
             </div>
             <p className="mb-6 leading-relaxed">
               Given a list of messages comprising a conversation, the model will return a response. ReadyPi standardizes the input and output formats across all providers.

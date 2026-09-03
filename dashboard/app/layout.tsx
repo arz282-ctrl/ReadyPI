@@ -4,21 +4,21 @@ import { AuthProvider } from '@/lib/auth-context'
 import AssistantGate from '@/components/AssistantGate'
 
 export const metadata: Metadata = {
-  title: 'ReadyPi — Asia\'s First AI API Gateway | Gemini, GPT-4, Llama',
-  description: 'Access 150+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment. One API key. Pay in BDT. Asia\'s largest AI gateway with local currency support.',
-  keywords: 'AI API, Bangladesh, bKash, Nagad, OpenAI, Claude, Gemini, GPT-4, OpenRouter, DeepSeek, Llama, Developer Tools',
+  title: "ReadyPi — India's #1 AI API Gateway & Market | Sarvam AI, Gemini, GPT-4o, Claude",
+  description: "Access 150+ AI models including Sarvam AI, Krutrim, Gemini 2.5, GPT-4o, and Claude 3.5 with UPI & Razorpay payments. One API key. Pay in INR (₹). Built for Indian developers & enterprises.",
+  keywords: 'AI API India, Sarvam AI, Krutrim, UPI payments, Razorpay, PhonePe, Paytm, OpenAI India, Claude, Gemini, GPT-4o, OpenRouter, DeepSeek, Llama, Developer Tools India',
   openGraph: {
-    title: 'ReadyPi — Asia\'s First AI API Gateway',
-    description: 'Access 150+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment.',
-    url: 'https://readypi.io',
-    siteName: 'ReadyPi',
-    locale: 'en_US',
+    title: "ReadyPi — India's Premier AI API Gateway & Market",
+    description: 'Access 150+ AI models including Sarvam AI, Gemini, GPT-4o, and Claude with UPI & Razorpay payments.',
+    url: 'https://readypi.site',
+    siteName: 'ReadyPi India',
+    locale: 'en_IN',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ReadyPi — Asia\'s First AI API Gateway',
-    description: 'Access 150+ AI models including Gemini, GPT-4, and Llama with bKash/Nagad payment.',
+    title: "ReadyPi — India's Premier AI API Gateway & Market",
+    description: 'Access 150+ AI models including Sarvam AI, Gemini, GPT-4o, and Claude with UPI & Razorpay payments.',
   },
   robots: {
     index: true,

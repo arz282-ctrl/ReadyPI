@@ -65,86 +65,70 @@ app.use((req, res, next) => {
 // ROUTES
 // ============================================================================
 
-// Health check
-app.get('/health', (req, res) => {
+// Health check (supports both /health and /api/health)
+const sendHealth = (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV
   });
-});
+};
+app.get('/health', sendHealth);
+app.get('/api/health', sendHealth);
 
 // Detailed health check with service diagnostics
-app.get('/health/detailed', async (req, res) => {
+const sendDetailedHealth = async (req, res) => {
   const diagnostics = {
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV,
     services: {
-      database: { status: 'checking' },
-      firebase: { status: 'checking' }
+      database: { status: 'checking' }
     }
   };
 
-  // Check database connection (await to avoid race condition)
+  // Check Supabase database connection
   try {
     await db.query('SELECT NOW()');
     diagnostics.services.database.status = 'ok';
-    diagnostics.services.database.message = 'Database connection healthy';
+    diagnostics.services.database.message = 'Supabase database connection healthy';
   } catch (err) {
     diagnostics.services.database.status = 'error';
     diagnostics.services.database.message = err.message;
     diagnostics.status = 'degraded';
   }
 
-  // Check Firebase configuration
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    try {
-      const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      if (sa.project_id && sa.private_key && sa.client_email) {
-        diagnostics.services.firebase.status = 'configured';
-        diagnostics.services.firebase.project_id = sa.project_id;
-        diagnostics.services.firebase.client_email = sa.client_email;
-        diagnostics.services.firebase.message = 'Firebase credentials are valid';
-      } else {
-        diagnostics.services.firebase.status = 'error';
-        diagnostics.services.firebase.message = 'Firebase service account missing required fields';
-        diagnostics.status = 'degraded';
-      }
-    } catch (parseErr) {
-      diagnostics.services.firebase.status = 'error';
-      diagnostics.services.firebase.message = `Firebase service account JSON parsing failed: ${parseErr.message}`;
-      diagnostics.status = 'degraded';
-    }
-  } else {
-    diagnostics.services.firebase.status = 'not_configured';
-    diagnostics.services.firebase.message = 'FIREBASE_SERVICE_ACCOUNT environment variable is not set';
-    diagnostics.status = 'degraded';
-  }
-
   res.json(diagnostics);
-});
+};
+app.get('/health/detailed', sendDetailedHealth);
+app.get('/api/health/detailed', sendDetailedHealth);
 
 // Root endpoint
-app.get('/', (req, res) => {
+const sendRoot = (req, res) => {
   res.json({
     name: 'ReadyPi API Gateway',
     version: '1.0.0',
-    description: 'Bangladesh\'s first AI API aggregation platform',
-    documentation: 'https://docs.readypi.io',
+    description: 'India\'s first AI API aggregation platform',
+    documentation: 'https://docs.readypi.site',
     status: 'operational'
   });
-});
+};
+app.get('/', sendRoot);
+app.get('/api', sendRoot);
 
-// API routes
-app.use('/v1/chat', chatRoutes);           // OpenAI-compatible chat completions
-app.use('/auth', authRoutes);              // Signup, login, logout
-app.use('/credits', creditsRoutes);        // Credit balance, top-up
-app.use('/keys', keysRoutes);              // API key management
-app.use('/payment', paymentRoutes);        // Payment callbacks (SSLCommerz, NOWPayments)
-// app.use('/assistant', assistantRoutes);    // Native ReadyPI live assistant (GPT-4o-mini, SSE) - disabled
+// Mount API routes for both direct routes and /api prefix (for Vercel rewrites)
+const mountRoutes = (prefix = '') => {
+  app.use(`${prefix}/v1/chat`, chatRoutes);           // OpenAI-compatible chat completions
+  app.use(`${prefix}/auth`, authRoutes);              // Signup, login, logout, supabase-exchange
+  app.use(`${prefix}/credits`, creditsRoutes);        // Credit balance, top-up
+  app.use(`${prefix}/keys`, keysRoutes);              // API key management
+  app.use(`${prefix}/payment`, paymentRoutes);        // Payment callbacks (Stripe, Razorpay, SSLCommerz)
+};
+
+mountRoutes('');
+mountRoutes('/api');
 
 // ============================================================================
 // ERROR HANDLING
@@ -155,7 +139,7 @@ app.use((req, res) => {
   res.status(404).json({
     error: 'Not Found',
     message: `Route ${req.method} ${req.path} does not exist`,
-    documentation: 'https://docs.readypi.io'
+    documentation: 'https://docs.readypi.site'
   });
 });
 

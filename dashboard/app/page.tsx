@@ -158,7 +158,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2015',
     headquarters: 'San Francisco, CA',
     bestFor: ['Complex reasoning', 'Code generation', 'Creative writing'],
-    pricing: 'From ৳0.15/1K tokens',
+    pricing: 'From ₹0.11/1K tokens',
     keyFeatures: ['Function calling', 'Vision support', 'JSON mode', 'Streaming'],
   },
   anthropic: {
@@ -166,7 +166,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2021',
     headquarters: 'San Francisco, CA',
     bestFor: ['Long context', 'Safety alignment', 'Nuanced responses'],
-    pricing: 'From ৳0.25/1K tokens',
+    pricing: 'From ₹0.19/1K tokens',
     keyFeatures: ['200K context', 'Tool use', 'Computer use', 'Artifacts'],
   },
   google: {
@@ -174,7 +174,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2017',
     headquarters: 'Mountain View, CA',
     bestFor: ['Multimodal', 'Long context', 'Cost efficiency'],
-    pricing: 'From ৳0.10/1K tokens',
+    pricing: 'From ₹0.08/1K tokens',
     keyFeatures: ['1M context', 'Native multimodal', 'Grounding', 'Code execution'],
   },
   deepseek: {
@@ -182,7 +182,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2023',
     headquarters: 'Beijing, China',
     bestFor: ['Coding', 'Math', 'Reasoning at low cost'],
-    pricing: 'From ৳0.10/1K tokens',
+    pricing: 'From ₹0.08/1K tokens',
     keyFeatures: ['MOE architecture', 'Long context', 'Code expert', 'DeepThink mode'],
   },
   mistral: {
@@ -190,7 +190,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2023',
     headquarters: 'Paris, France',
     bestFor: ['European hosting', 'Open weights', 'Balanced performance'],
-    pricing: 'From ৳0.20/1K tokens',
+    pricing: 'From ₹0.15/1K tokens',
     keyFeatures: ['Open weights', 'Commercial license', 'Mixture of experts', 'European'],
   },
   meta: {
@@ -198,7 +198,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2024',
     headquarters: 'Menlo Park, CA',
     bestFor: ['Open source', 'Large context', 'Community support'],
-    pricing: 'From ৳0.05/1K tokens',
+    pricing: 'From ₹0.04/1K tokens',
     keyFeatures: ['Open source', 'Llama Guard', 'Quantized versions', 'Large scale'],
   },
   openrouter: {
@@ -206,7 +206,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2023',
     headquarters: 'San Francisco, CA',
     bestFor: ['Free models', 'Aggregated access', 'Experimentation'],
-    pricing: 'From ৳0.00/1K tokens',
+    pricing: 'From ₹0.00/1K tokens',
     keyFeatures: ['Free tier models', 'Multi-provider', 'Rate limit pooling', 'Fallbacks'],
   },
   vertex: {
@@ -214,7 +214,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2021',
     headquarters: 'Mountain View, CA',
     bestFor: ['Enterprise GCP', 'Compliance', 'Multi-model'],
-    pricing: 'From ৳0.35/1K tokens',
+    pricing: 'From ₹0.27/1K tokens',
     keyFeatures: ['GCP native', 'SOC2/ISO', 'Private endpoints', 'Model Garden'],
   },
   aws: {
@@ -222,7 +222,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2023',
     headquarters: 'Seattle, WA',
     bestFor: ['Enterprise AWS', 'Private deployment', 'Compliance'],
-    pricing: 'From ৳0.40/1K tokens',
+    pricing: 'From ₹0.30/1K tokens',
     keyFeatures: ['AWS native', 'VPC endpoints', 'Guardrails', 'Multi-model'],
   },
   cohere: {
@@ -230,7 +230,7 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2019',
     headquarters: 'Toronto, Canada',
     bestFor: ['RAG', 'Enterprise search', 'Embeddings'],
-    pricing: 'From ৳0.30/1K tokens',
+    pricing: 'From ₹0.23/1K tokens',
     keyFeatures: ['Command R+', 'Embed v3', 'Rerank', 'Tool use'],
   },
   azure: {
@@ -238,25 +238,25 @@ const providerDetails: Record<string, { website: string; founded: string; headqu
     founded: '2010',
     headquarters: 'Redmond, WA',
     bestFor: ['Enterprise', 'Compliance', 'SLA guarantee'],
-    pricing: 'From ৳0.50/1K tokens',
+    pricing: 'From ₹0.38/1K tokens',
     keyFeatures: ['Enterprise SLA', 'SOC2/ISO', 'Private networking', 'Content filtering'],
   },
 }
 
 // Models data
 const modelsList = [
-  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'Google', context: '1M', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.3s', isFree: true },
-  { id: 'meta-llama/llama-3.3-70b', name: 'Llama 3.3 70B', provider: 'Groq', context: '128K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.2s', isFree: true },
-  { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1', provider: 'DeepSeek', context: '64K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.5s', isFree: true },
-  { id: 'mistralai/mistral-nemo', name: 'Mistral Nemo', provider: 'Mistral', context: '128K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.3s', isFree: true },
-  { id: 'qwen/qwen-2.5-72b', name: 'Qwen 2.5 72B', provider: 'OpenRouter', context: '128K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.4s', isFree: true },
-  { id: 'microsoft/phi-3-mini-128k', name: 'Phi-3 Mini 128K', provider: 'OpenRouter', context: '128K', promptPrice: '৳0.00', completionPrice: '৳0.00', latency: '0.2s', isFree: true },
-  { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI', context: '128K', promptPrice: '৳5.00', completionPrice: '৳15.00', latency: '0.6s', isFree: false },
-  { id: 'anthropic/claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic', context: '200K', promptPrice: '৳3.00', completionPrice: '৳15.00', latency: '0.5s', isFree: false },
-  { id: 'openai/o3-mini', name: 'o3-mini', provider: 'OpenAI', context: '128K', promptPrice: '৳1.10', completionPrice: '৳4.40', latency: '1.0s', isFree: false },
-  { id: 'google/gemini-2.0-pro', name: 'Gemini 2.0 Pro', provider: 'Google', context: '1M', promptPrice: '৳1.25', completionPrice: '৳5.00', latency: '0.5s', isFree: false },
-  { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', provider: 'DeepSeek', context: '64K', promptPrice: '৳0.20', completionPrice: '৳0.40', latency: '0.4s', isFree: false },
-  { id: 'cohere/command-r-plus', name: 'Command R+', provider: 'Cohere', context: '128K', promptPrice: '৳3.00', completionPrice: '৳15.00', latency: '0.6s', isFree: false },
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'Google', context: '1M', promptPrice: '₹0.00', completionPrice: '₹0.00', latency: '0.3s', isFree: true },
+  { id: 'meta-llama/llama-3.3-70b', name: 'Llama 3.3 70B', provider: 'Groq', context: '128K', promptPrice: '₹0.00', completionPrice: '₹0.00', latency: '0.2s', isFree: true },
+  { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1', provider: 'DeepSeek', context: '64K', promptPrice: '₹0.00', completionPrice: '₹0.00', latency: '0.5s', isFree: true },
+  { id: 'mistralai/mistral-nemo', name: 'Mistral Nemo', provider: 'Mistral', context: '128K', promptPrice: '₹0.00', completionPrice: '₹0.00', latency: '0.3s', isFree: true },
+  { id: 'qwen/qwen-2.5-72b', name: 'Qwen 2.5 72B', provider: 'OpenRouter', context: '128K', promptPrice: '₹0.00', completionPrice: '₹0.00', latency: '0.4s', isFree: true },
+  { id: 'microsoft/phi-3-mini-128k', name: 'Phi-3 Mini 128K', provider: 'OpenRouter', context: '128K', promptPrice: '₹0.00', completionPrice: '₹0.00', latency: '0.2s', isFree: true },
+  { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'OpenAI', context: '128K', promptPrice: '₹3.79', completionPrice: '₹11.36', latency: '0.6s', isFree: false },
+  { id: 'anthropic/claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic', context: '200K', promptPrice: '₹2.27', completionPrice: '₹11.36', latency: '0.5s', isFree: false },
+  { id: 'openai/o3-mini', name: 'o3-mini', provider: 'OpenAI', context: '128K', promptPrice: '₹0.83', completionPrice: '₹3.33', latency: '1.0s', isFree: false },
+  { id: 'google/gemini-2.0-pro', name: 'Gemini 2.0 Pro', provider: 'Google', context: '1M', promptPrice: '₹0.95', completionPrice: '₹3.79', latency: '0.5s', isFree: false },
+  { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', provider: 'DeepSeek', context: '64K', promptPrice: '₹0.15', completionPrice: '₹0.30', latency: '0.4s', isFree: false },
+  { id: 'cohere/command-r-plus', name: 'Command R+', provider: 'Cohere', context: '128K', promptPrice: '₹2.27', completionPrice: '₹11.36', latency: '0.6s', isFree: false },
 ]
 
 // Ticker models
@@ -287,7 +287,7 @@ const codeTabs = [
     code: `from openai import OpenAI
 
 client = OpenAI(
-  base_url="https://api.readypi.io/v1",
+  base_url="https://api.readypi.online/v1",
   api_key="rpi_live_*******************"
 )
 
@@ -306,7 +306,7 @@ print(completion.choices[0].message.content)`
     code: `import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://api.readypi.io/v1',
+  baseURL: 'https://api.readypi.online/v1',
   apiKey: 'rpi_live_*******************',
 });
 
@@ -322,7 +322,7 @@ console.log(completion.choices[0].message.content);`
   {
     label: 'cURL',
     language: 'bash',
-    code: `curl https://api.readypi.io/v1/chat/completions \\
+    code: `curl https://api.readypi.online/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer rpi_live_*******************" \\
   -d '{
@@ -336,12 +336,12 @@ console.log(completion.choices[0].message.content);`
 
 // Features
 const features = [
-  { icon: <Network size={22} />, title: 'Intelligent Routing', description: 'Auto-fallback across providers. If Claude is down, GPT-4o takes over seamlessly with zero downtime.', highlight: true },
-  { icon: <Gauge size={22} />, title: 'Lowest Latency', description: 'Smart routing picks the fastest provider for each request. Sub-200ms response times with Groq acceleration.', highlight: true },
+  { icon: <Network size={22} />, title: 'Intelligent Routing', description: 'Auto-fallback across providers. If Claude is down, GPT-4o or Gemini takes over seamlessly with zero downtime.', highlight: true },
+  { icon: <Gauge size={22} />, title: 'Lowest Latency', description: 'Smart routing picks the fastest provider. Sub-100ms response times for Sarvam AI & Groq accelerated models.', highlight: true },
   { icon: <Lock size={22} />, title: 'Enterprise Security', description: 'SOC 2 compliant infrastructure. All traffic encrypted. API keys never stored in plaintext.', highlight: false },
-  { icon: <CreditCard size={22} />, title: 'Local Currency Payments', description: 'bKash, Nagad, Rocket, USDT, Stripe — pay in your local currency. No international card needed. Credits never expire.', highlight: true },
-  { icon: <Code size={22} />, title: 'OpenAI Compatible', description: 'Drop-in replacement. Change your base URL and instantly access 150+ models without rewriting code.', highlight: false },
-  { icon: <Users size={22} />, title: 'Team Management', description: 'Shared billing, usage analytics per member, and admin controls for production workloads.', highlight: false },
+  { icon: <CreditCard size={22} />, title: 'UPI & Local Currency Payments', description: 'PhonePe, Google Pay, Paytm, BHIM, NetBanking, Cards & Razorpay — pay in INR (₹). Instant automated top-ups.', highlight: true },
+  { icon: <Code size={22} />, title: 'OpenAI Compatible', description: 'Drop-in replacement. Change your base URL and instantly access 150+ models including Sarvam & Krutrim.', highlight: false },
+  { icon: <Users size={22} />, title: 'Team Management', description: 'Shared billing in ₹ INR, usage analytics per member, and admin controls for production workloads.', highlight: false },
 ]
 
 // Trust indicators
@@ -356,31 +356,31 @@ const trustIndicators = [
 const stats = [
   { value: 150, suffix: '+', label: 'AI Models', icon: <Layers size={20} /> },
   { value: 99, suffix: '.9%', label: 'Uptime SLA', icon: <Server size={20} /> },
-  { value: 100, suffix: 'ms', label: 'Avg Latency', icon: <Clock size={20} /> },
-  { value: 5, suffix: 'K+', label: 'Active Users', icon: <Users size={20} /> },
+  { value: 80, suffix: 'ms', label: 'Avg Latency', icon: <Clock size={20} /> },
+  { value: 10, suffix: 'K+', label: 'Indian Developers', icon: <Users size={20} /> },
 ]
 
 // Testimonials
 const testimonials = [
   {
-    name: 'Rafiqul Islam',
-    role: 'CTO, TechStart BD',
-    content: 'ReadyPi transformed our AI integration. The BDT pricing with bKash support is exactly what Bangladesh needed.',
-    avatar: 'RI',
+    name: 'Aarav Sharma',
+    role: 'CTO, NextGen AI Bengaluru',
+    content: 'ReadyPi is a game changer for the Indian AI ecosystem. Having Sarvam AI, Gemini, and GPT-4o accessible under one API with instant UPI payment made integration seamless.',
+    avatar: 'AS',
     rating: 5
   },
   {
-    name: 'Nusrat Jahan',
-    role: 'Lead Developer, Dhaka AI Labs',
-    content: 'The OpenAI compatibility meant we migrated in under an hour. Best decision for our startup.',
-    avatar: 'NJ',
+    name: 'Ananya Verma',
+    role: 'Lead AI Engineer, Mumbai Tech Stack',
+    content: 'The OpenAI compatibility allowed us to migrate our entire infrastructure in 30 minutes. Super clean INR billing with Razorpay support!',
+    avatar: 'AV',
     rating: 5
   },
   {
-    name: 'Tanvir Ahmed',
-    role: 'Founder, CodeCraft BD',
-    content: 'Reliable, fast, and affordable. ReadyPi powers all our production AI features.',
-    avatar: 'TA',
+    name: 'Rohan Mehta',
+    role: 'Founder, Hyderabad AI Labs',
+    content: 'Reliable, lightning fast, and cost effective. Having Indic language models alongside global LLMs in local INR pricing is unbeatable.',
+    avatar: 'RM',
     rating: 5
   },
 ]
@@ -427,7 +427,7 @@ export default function Home() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]"></span>
               </span>
-              <span className="text-xs text-[#ff6b4a] tracking-wide font-mono uppercase font-medium">Asia's First AI Gateway — Local Currency Support</span>
+              <span className="text-xs text-[#ff6b4a] tracking-wide font-mono uppercase font-medium">India's #1 AI Gateway — UPI & Razorpay Enabled</span>
             </motion.div>
 
             {/* Headline */}
@@ -435,13 +435,13 @@ export default function Home() {
               One API.{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff8a6a] via-[#ff6b4a] to-[#c8381a]">150+ Models.</span>
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-300">Pay in Your Currency.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-300">Pay in INR (₹).</span>
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p variants={staggerItemVariants} className="text-base sm:text-lg text-gray-400 max-w-xl leading-relaxed mb-8 sm:mb-10 mx-auto lg:mx-0">
-              Access GPT-4o, Claude, Gemini, Llama, DeepSeek, and 150+ more models through one standardized API.
-              <span className="text-[#ff6b4a] font-semibold"> Pay with bKash, Nagad, Rocket, USDT, or card — always in your local currency.</span>
+              Access Sarvam AI, Krutrim, Gemini 2.5, GPT-4o, Claude 3.5, and 150+ models through one unified API key.
+              <span className="text-[#ff6b4a] font-semibold"> Pay instantly with PhonePe, Google Pay, Paytm, UPI, Cards or NetBanking.</span>
             </motion.p>
 
             {/* CTA Buttons */}
@@ -664,8 +664,8 @@ export default function Home() {
                   <th className="py-4 px-4 font-semibold">Model</th>
                   <th className="py-4 px-4 font-semibold">Provider</th>
                   <th className="py-4 px-4 font-semibold">Context</th>
-                  <th className="py-4 px-4 font-semibold text-right">Prompt ৳</th>
-                  <th className="py-4 px-4 font-semibold text-right">Completion ৳</th>
+                  <th className="py-4 px-4 font-semibold text-right">Prompt ₹</th>
+                  <th className="py-4 px-4 font-semibold text-right">Completion ₹</th>
                   <th className="py-4 px-4 font-semibold">Latency</th>
                   <th className="py-4 px-4 font-semibold text-center">Status</th>
                 </tr>
@@ -915,7 +915,7 @@ export default function Home() {
                 <PiMark variant="logo" withWordmark />
               </Link>
               <p className="text-gray-500 text-xs leading-relaxed mb-4">
-                The unified gateway for AI models. Built by Rareware Studio in Bangladesh.
+                The unified gateway for AI models. Built by Rareware Studio in India.
               </p>
               {/* Social Links */}
               <div className="flex gap-4">
@@ -949,7 +949,7 @@ export default function Home() {
             ))}
           </div>
           <div className="pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600">
-            <div>© 2026 ReadyPi · Rareware Studio · Bangladesh 🇧🇩</div>
+            <div>© 2026 ReadyPi · Rareware Studio · India 🇮🇳</div>
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> All Systems Operational

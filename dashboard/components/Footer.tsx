@@ -11,7 +11,7 @@ export default function Footer() {
               <PiMark variant="logo" withWordmark />
             </div>
             <p className="text-sm text-gray-500 leading-relaxed mb-4">Asia's first AI API gateway. One key. 150+ models. Pay in your local currency.</p>
-            <div className="font-mono text-[10px] text-[#ff6b4a]">readypi.io</div>
+            <div className="font-mono text-[10px] text-[#ff6b4a]">readypi.site</div>
           </div>
           {[
             { title: 'Platform', links: [{ label: 'Documentation', href: '/docs' }, { label: 'Pricing', href: '/pricing' }, { label: 'Playground', href: '/playground' }, { label: 'Models', href: '/models' }] },
@@ -29,7 +29,7 @@ export default function Footer() {
           ))}
         </div>
         <div className="pt-8 border-t border-gray-900 flex flex-wrap justify-between items-center gap-4">
-          <div className="font-mono text-[9px] uppercase tracking-wider text-gray-600">© 2026 ReadyPi · Rareware Studio · Sylhet, Bangladesh 🇧🇩</div>
+          <div className="font-mono text-[9px] uppercase tracking-wider text-gray-600">© 2026 ReadyPi · Rareware Studio · Mumbai, India 🇮🇳</div>
           <div className="font-mono text-[9px] uppercase tracking-wider text-gray-600">Ready + API + π · Infinite Access</div>
         </div>
       </div>

@@ -10,6 +10,7 @@ interface LogEntry {
   provider: string
   tokens: number
   credits_used: number
+  cost_inr?: number
   cost_bdt: number
   status: string
   timestamp: string
@@ -53,9 +54,9 @@ function getModelShortName(model: string): string {
 // ─── CSV Export ─────────────────────────────────────────────────────────────
 
 function exportCSV(logs: LogEntry[]) {
-  const header = 'Date,Model,Provider,Tokens,Credits,Cost BDT,Status\n'
+  const header = 'Date,Model,Provider,Tokens,Credits,Cost INR,Status\n'
   const rows = logs.map(l =>
-    `${l.timestamp},${l.model},${l.provider},${l.tokens},${l.credits_used},${l.cost_bdt},${l.status}`
+    `${l.timestamp},${l.model},${l.provider},${l.tokens},${l.credits_used},${l.cost_inr || l.cost_bdt},${l.status}`
   ).join('\n')
 
   const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
@@ -190,7 +191,7 @@ export default function LogsTable({ logs, loading, total, limit, offset, onPageC
                   <td className="py-3 px-4 text-white font-medium">{getModelShortName(log.model)}</td>
                   <td className="py-3 px-4 text-[#9b9ba8] capitalize">{log.provider}</td>
                   <td className="py-3 px-4 text-[#9b9ba8] tabular-nums">{log.tokens.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-[#00ff88] tabular-nums">৳{log.cost_bdt.toFixed(4)}</td>
+                  <td className="py-3 px-4 text-[#00ff88] tabular-nums">₹{log.cost_bdt.toFixed(4)}</td>
                   <td className="py-3 px-4 text-right"><StatusBadge status={log.status} /></td>
                 </tr>
               ))

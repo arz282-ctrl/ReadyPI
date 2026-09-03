@@ -56,7 +56,7 @@ function EmptyState() {
       {/* Code example */}
       <div className="mt-8 max-w-lg mx-auto">
         <pre className="bg-[#0a0a0f] border border-[#1f1f23] rounded-xl p-4 text-left text-xs font-mono text-[#9b9ba8] overflow-x-auto">
-          <code>{`curl https://api.readypi.io/v1/chat/completions \\
+          <code>{`curl https://api.readypi.online/v1/chat/completions \\
   -H "Authorization: Bearer rpi_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{"model": "readypi/gemini-flash",
@@ -290,6 +290,11 @@ export default function UserDashboard() {
     { id: 'logs' as const, label: 'Logs', icon: <RefreshCw size={14} /> },
   ]
 
+  // External pages (rendered as links, not inline tabs)
+  const externalTabs = [
+    { href: '/dashboard/sergeantpi', label: 'SergeantPI', icon: <Rocket size={14} /> },
+  ]
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-gray-300">
       {/* ── Navbar ── */}
@@ -376,6 +381,18 @@ export default function UserDashboard() {
               >
                 {t.icon} {t.label}
               </button>
+            ))}
+            {/* Separator */}
+            <div className="h-5 w-px bg-[#1f1f23] mx-1 self-center" />
+            {/* External agent pages */}
+            {externalTabs.map(t => (
+              <Link
+                key={t.href}
+                href={t.href}
+                className="flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 border-transparent text-[#6b6b76] hover:text-[#f59e0b] transition-colors whitespace-nowrap"
+              >
+                {t.icon} {t.label}
+              </Link>
             ))}
           </div>
         </div>

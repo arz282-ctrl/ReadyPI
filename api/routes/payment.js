@@ -20,10 +20,10 @@ const NP_API_KEY = process.env.NOWPAYMENTS_API_KEY;
  */
 router.post('/create', verifyJWT, paymentRateLimiter, async (req, res) => {
   try {
-    const { package_id, payment_method } = req.body;
+    const { package_id, payment_method, custom_amount } = req.body;
 
     // Validate payment method
-    const validMethods = ['bkash', 'nagad', 'rocket', 'card', 'usdt', 'btc'];
+    const validMethods = ['upi', 'razorpay', 'phonepe', 'gpay', 'paytm', 'bhim', 'card', 'bank', 'netbanking', 'usdt', 'btc', 'bkash', 'nagad'];
     if (!validMethods.includes(payment_method)) {
       return res.status(400).json({
         error: 'Invalid payment method',
@@ -31,64 +31,89 @@ router.post('/create', verifyJWT, paymentRateLimiter, async (req, res) => {
       });
     }
 
-    // Get package details
+    // Get package details (INR Market)
     const packages = {
-      micro: { price_bdt: 199, credits: 1000 },
-      small: { price_bdt: 499, credits: 3000 },
-      medium: { price_bdt: 999, credits: 7000 },
-      large: { price_bdt: 1999, credits: 18000 },
-      xl: { price_bdt: 4999, credits: 50000 }
+      micro: { price_inr: 99, credits: 1000 },
+      small: { price_inr: 499, credits: 5500 },
+      medium: { price_inr: 1499, credits: 18000 },
+      pro: { price_inr: 4999, credits: 65000 },
+      team: { price_inr: 18999, credits: 260000 },
+      large: { price_inr: 4999, credits: 65000 },
+      xl: { price_inr: 14999, credits: 200000 }
     };
 
-    if (!packages[package_id]) {
+    let price_inr = 0;
+    let credits = 0;
+
+    if (custom_amount && !isNaN(Number(custom_amount)) && Number(custom_amount) >= 10) {
+      price_inr = Math.round(Number(custom_amount));
+      credits = Math.round(price_inr * 12);
+    } else if (packages[package_id]) {
+      const pkg = packages[package_id];
+      price_inr = pkg.price_inr;
+      credits = pkg.credits;
+    } else {
       return res.status(400).json({
-        error: 'Invalid package',
-        message: 'Package not found'
+        error: 'Invalid package or amount',
+        message: 'Minimum custom recharge is ₹10'
       });
     }
 
-    const pkg = packages[package_id];
+    const pkg = { price_inr, credits };
 
     // Create pending transaction
     const txResult = await db.query(
-      `INSERT INTO transactions (user_id, amount_bdt, credits_added, payment_method, status)
-       VALUES ($1, $2, $3, $4, 'pending')
+      `INSERT INTO transactions (user_id, amount_inr, amount_bdt, credits_added, payment_method, status)
+       VALUES ($1, $2, $3, $4, $5, 'pending')
        RETURNING id`,
-      [req.user.id, pkg.price_bdt, pkg.credits, payment_method]
+      [req.user.id, pkg.price_inr, Math.round(pkg.price_inr * 1.3), pkg.credits, payment_method]
     );
 
     const transactionId = txResult.rows[0].id;
+    const isRazorpay = ['razorpay', 'upi', 'phonepe', 'gpay', 'paytm', 'bhim', 'card', 'netbanking'].includes(payment_method);
     const isInternational = ['usdt', 'btc'].includes(payment_method);
 
     // Initialize Payment Gateway
     let paymentData;
-    if (isInternational) {
+    if (isRazorpay) {
+      paymentData = await paymentService.createRazorpayOrder({
+        transactionId,
+        totalAmountINR: pkg.price_inr,
+        customerName: req.user.full_name,
+        customerEmail: req.user.email
+      });
+    } else if (isInternational) {
       paymentData = await paymentService.initNOWPayments({
         transactionId,
-        totalAmount: pkg.price_bdt,
+        totalAmount: pkg.price_inr,
         customerEmail: req.user.email
       });
     } else {
       paymentData = await paymentService.initSSLCommerz({
         transactionId,
-        totalAmount: pkg.price_bdt,
+        totalAmount: pkg.price_inr,
         customerName: req.user.full_name,
         customerEmail: req.user.email
       });
     }
 
-    logger.info('Payment initiated with SSLCommerz', {
+    logger.info('Payment initiated', {
       userId: req.user.id,
       transactionId,
       package: package_id,
-      amount: pkg.price_bdt,
-      method: payment_method
+      amount: pkg.price_inr,
+      method: payment_method,
+      gateway: isRazorpay ? 'razorpay' : isInternational ? 'nowpayments' : 'sslcommerz'
     });
 
     res.json({
       transaction_id: transactionId,
       payment_url: paymentData.gatewayUrl,
-      amount_bdt: pkg.price_bdt,
+      order_id: paymentData.orderId,
+      key_id: paymentData.keyId,
+      amount: paymentData.amount,
+      amount_inr: pkg.price_inr,
+      currency: paymentData.currency || 'INR',
       credits: pkg.credits,
       payment_method
     });
@@ -233,6 +258,82 @@ router.post('/callback/nowpayments/ipn', async (req, res) => {
   } catch (error) {
     logger.error('NOWPayments IPN error:', error);
     res.status(500).send('Error');
+  }
+});
+
+/**
+ * POST /payment/razorpay/verify
+ * Verify a Razorpay checkout payment (client calls this after Checkout.js succeeds)
+ * and credit the user's account.
+ */
+router.post('/razorpay/verify', verifyJWT, async (req, res) => {
+  try {
+    const { transaction_id, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    if (!transaction_id || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({
+        error: 'Missing fields',
+        message: 'transaction_id, razorpay_order_id, razorpay_payment_id, and razorpay_signature are required'
+      });
+    }
+
+    const isValid = paymentService.verifyRazorpaySignature({
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+      signature: razorpay_signature
+    });
+
+    if (!isValid) {
+      logger.warn('Razorpay signature verification failed', { transaction_id, razorpay_order_id });
+      return res.status(400).json({ error: 'Verification failed', message: 'Invalid payment signature' });
+    }
+
+    const client = await db.getClient();
+    try {
+      await client.query('BEGIN');
+
+      const txCheck = await client.query(
+        'SELECT status, user_id, credits_added FROM transactions WHERE id = $1 AND user_id = $2',
+        [transaction_id, req.user.id]
+      );
+
+      if (txCheck.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Not found', message: 'Transaction not found' });
+      }
+
+      if (txCheck.rows[0].status !== 'pending') {
+        await client.query('ROLLBACK');
+        return res.json({ message: 'Payment already processed', status: txCheck.rows[0].status });
+      }
+
+      const { user_id, credits_added } = txCheck.rows[0];
+
+      await client.query(
+        `UPDATE transactions
+         SET status = 'completed', completed_at = NOW(), payment_gateway = 'razorpay', gateway_transaction_id = $2
+         WHERE id = $1`,
+        [transaction_id, razorpay_payment_id]
+      );
+
+      await client.query(
+        `UPDATE credits SET balance = balance + $2, total_purchased = total_purchased + $2 WHERE user_id = $1`,
+        [user_id, credits_added]
+      );
+
+      await client.query('COMMIT');
+      logger.info('Razorpay payment verified and credits added', { userId: user_id, credits: credits_added, transaction_id });
+
+      res.json({ message: 'Payment verified successfully', credits_added, status: 'completed' });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    logger.error('Razorpay verify error:', error);
+    res.status(500).json({ error: 'Failed to verify payment', message: error.message });
   }
 });
 
@@ -683,7 +784,7 @@ router.get('/bdt/pending', verifyJWT, async (req, res) => {
               t.payment_method, t.gateway_transaction_id, t.metadata, t.created_at
        FROM transactions t
        JOIN users u ON t.user_id = u.id
-       WHERE t.status = 'pending_verification' AND t.payment_gateway = 'manual_bdt'
+       WHERE t.status = 'pending_verification' AND t.payment_gateway IN ('manual_bdt', 'manual_upi')
        ORDER BY t.created_at ASC`
     );
 
@@ -715,7 +816,7 @@ router.post('/bdt/verify', verifyJWT, async (req, res) => {
     }
 
     const txCheck = await db.query(
-      "SELECT id, user_id, credits_added, status FROM transactions WHERE id = $1 AND payment_gateway = 'manual_bdt'",
+      "SELECT id, user_id, credits_added, status FROM transactions WHERE id = $1 AND payment_gateway IN ('manual_bdt', 'manual_upi')",
       [transaction_id]
     );
 
@@ -780,6 +881,113 @@ router.post('/bdt/verify', verifyJWT, async (req, res) => {
   } catch (error) {
     logger.error('BDT verify error:', error);
     res.status(500).json({ error: 'Failed to verify payment' });
+  }
+});
+
+// ============================================================================
+// MANUAL UPI (INDIA) PAYMENTS
+// ============================================================================
+
+// INR → BDT conversion (1 BDT ≈ 0.76 INR → 1 INR ≈ 1.316 BDT). Keep in sync with dashboard/lib/currency.ts
+const INR_TO_BDT = 1 / 0.76;
+
+/**
+ * GET /payment/upi/info
+ * Return UPI details for manual INR transfer
+ */
+router.get('/upi/info', (req, res) => {
+  res.json({
+    upi_id: process.env.UPI_ID || '8512949515@ptsbi',
+    payee_name: process.env.UPI_PAYEE_NAME || 'Shokat Ali Khan',
+    qr_image: '/payments/upi-qr.png', // served by the dashboard
+    accepted_apps: ['Any UPI app', 'PhonePe', 'Google Pay', 'Paytm', 'BHIM'],
+    instructions:
+      'Scan the QR or pay to the UPI ID above using any UPI app. Then submit the 12-digit UTR (transaction reference) using POST /payment/upi/submit. Credits are added after verification.'
+  });
+});
+
+/**
+ * POST /payment/upi/submit
+ * User submits a manual UPI (INR) payment for admin verification
+ */
+router.post('/upi/submit', verifyJWT, paymentRateLimiter, async (req, res) => {
+  try {
+    const { amount_inr, utr, payer_upi } = req.body;
+
+    if (!amount_inr || !utr) {
+      return res.status(400).json({
+        error: 'Missing fields',
+        message: 'amount_inr and utr (UPI transaction reference) are required'
+      });
+    }
+
+    const parsedInr = parseFloat(amount_inr);
+    if (isNaN(parsedInr) || parsedInr < 40) {
+      return res.status(400).json({
+        error: 'Invalid amount',
+        message: 'Minimum top-up is ₹40'
+      });
+    }
+
+    const utrClean = String(utr).trim();
+    if (!/^[A-Za-z0-9]{10,22}$/.test(utrClean)) {
+      return res.status(400).json({
+        error: 'Invalid UTR',
+        message: 'UTR should be the 12-digit reference number from your UPI app'
+      });
+    }
+
+    const amountBdt = Math.round(parsedInr * INR_TO_BDT * 100) / 100;
+    const credits = Math.floor(amountBdt); // same rate as BDT: 1 credit per BDT
+
+    const existing = await db.query(
+      "SELECT id FROM transactions WHERE gateway_transaction_id = $1 AND payment_gateway = 'manual_upi'",
+      [utrClean]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.status(409).json({
+        error: 'Duplicate transaction',
+        message: 'This UTR has already been submitted'
+      });
+    }
+
+    const result = await db.query(
+      `INSERT INTO transactions
+       (user_id, amount_bdt, amount_usd, credits_added, payment_method, payment_gateway, gateway_transaction_id, status, metadata)
+       VALUES ($1, $2, NULL, $3, 'upi', 'manual_upi', $4, 'pending_verification', $5)
+       RETURNING id`,
+      [
+        req.user.id,
+        amountBdt,
+        credits,
+        utrClean,
+        JSON.stringify({
+          amount_inr: parsedInr,
+          payer_upi: payer_upi || null,
+          submitted_at: new Date().toISOString()
+        })
+      ]
+    );
+
+    logger.info('Manual UPI payment submitted', {
+      userId: req.user.id,
+      txId: result.rows[0].id,
+      amountInr: parsedInr,
+      utr: utrClean
+    });
+
+    res.status(201).json({
+      message: 'Payment submitted for verification. Credits will be added after admin approval.',
+      id: result.rows[0].id,
+      amount_inr: parsedInr,
+      credits_pending: credits,
+      status: 'pending_verification'
+    });
+
+  } catch (error) {
+    logger.error('UPI submit error:', error);
+    res.status(500).json({ error: 'Failed to submit payment' });
   }
 });
 

@@ -37,6 +37,8 @@ Thumbs.db
 dist/
 build/
 .next/
+dashboard/.next/
+**/.next/
 out/
 
 # Testing
@@ -107,3 +109,7 @@ pool/
 # Environment files with secrets
 *.env.yaml
 db_url_secret.txt
+
+# TypeScript and Vercel caches
+*.tsbuildinfo
+.vercel/

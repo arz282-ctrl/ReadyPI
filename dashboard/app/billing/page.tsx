@@ -2,46 +2,30 @@
 
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Wallet, CreditCard, ChevronLeft, ChevronRight, BellRing, Download, CheckCircle2, Loader2, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
-import { creditsAPI } from '@/lib/api'
 
 export default function BillingPage() {
   const { user } = useAuth()
+  const router = useRouter()
   const [topupAmount, setTopupAmount] = useState('500')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [autoRecharge, setAutoRecharge] = useState(true)
 
-  const handleCheckout = useCallback(async () => {
+  // Hand off to /checkout, which has the full UPI/Razorpay flow wired up
+  const handleCheckout = useCallback(() => {
     setLoading(true)
     setError(null)
-    try {
-      let packageId = 'small'
-      const amt = parseInt(topupAmount)
-      if (amt < 300) packageId = 'micro'
-      else if (amt < 700) packageId = 'small'
-      else if (amt < 1500) packageId = 'medium'
-      else if (amt < 3000) packageId = 'large'
-      else packageId = 'xl'
-
-      const { data } = await creditsAPI.createPayment(packageId, 'bkash')
-      if (data.payment_url) {
-        window.location.href = data.payment_url
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to initialize payment'
-      setError(message)
-    } finally {
-      setLoading(false)
-    }
-  }, [topupAmount])
+    router.push(`/checkout?amount=${encodeURIComponent(topupAmount)}`)
+  }, [topupAmount, router])
 
   const transactions = [
-    { id: 'TRX-8921A', date: '2026-04-24', amount: '৳1,000.00', method: 'bKash', status: 'Completed' },
-    { id: 'TRX-7742B', date: '2026-04-10', amount: '৳500.00', method: 'Nagad', status: 'Completed' },
-    { id: 'TRX-6190C', date: '2026-03-28', amount: '৳2,000.00', method: 'SSLCommerz (Card)', status: 'Completed' }
+    { id: 'TRX-8921A', date: '2026-04-24', amount: '₹1,499.00', method: 'UPI (PhonePe)', status: 'Completed' },
+    { id: 'TRX-7742B', date: '2026-04-10', amount: '₹499.00', method: 'Razorpay', status: 'Completed' },
+    { id: 'TRX-6190C', date: '2026-03-28', amount: '₹4,999.00', method: 'Net Banking', status: 'Completed' }
   ]
 
   return (
@@ -73,7 +57,7 @@ export default function BillingPage() {
                   Available Credit Balance
                 </div>
                 <div className="text-4xl sm:text-5xl md:text-6xl font-fraunces font-black text-white mb-4 sm:mb-6">
-                  ৳{user?.credits?.balance?.toLocaleString() || '0'}<span className="text-gray-500 text-2xl sm:text-3xl">.00</span>
+                  ₹{user?.credits?.balance?.toLocaleString() || '0'}<span className="text-gray-500 text-2xl sm:text-3xl">.00</span>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-gray-800 pt-4 sm:pt-6 gap-3 sm:gap-0">
@@ -126,7 +110,7 @@ export default function BillingPage() {
 
               <div className="mb-4 sm:mb-6">
                 <label className="block text-[10px] sm:text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2 sm:mb-3">
-                  Select Amount (BDT)
+                  Select Amount (INR)
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                   {['500', '1000', '2500', '5000'].map(amt => (
@@ -140,7 +124,7 @@ export default function BillingPage() {
                       }`}
                       whileTap={{ scale: 0.95 }}
                     >
-                      ৳{amt}
+                      ₹{amt}
                     </motion.button>
                   ))}
                 </div>
@@ -151,7 +135,7 @@ export default function BillingPage() {
                   Or Enter Custom Amount
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">৳</span>
+                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">₹</span>
                   <input 
                     type="number" 
                     value={topupAmount}
@@ -177,8 +161,8 @@ export default function BillingPage() {
               </motion.button>
               
               <div className="mt-3 sm:mt-4 flex justify-center gap-2 sm:gap-4 opacity-50 grayscale">
-                <span className="text-[10px] border border-gray-700 px-2 py-1 rounded">bKash</span>
-                <span className="text-[10px] border border-gray-700 px-2 py-1 rounded">Nagad</span>
+                <span className="text-[10px] border border-gray-700 px-2 py-1 rounded">UPI</span>
+                <span className="text-[10px] border border-gray-700 px-2 py-1 rounded">Razorpay</span>
                 <span className="text-[10px] border border-gray-700 px-2 py-1 rounded">VISA / MC</span>
               </div>
             </div>

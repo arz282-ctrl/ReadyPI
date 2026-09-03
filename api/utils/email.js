@@ -16,7 +16,7 @@ class EmailService {
 
       // TODO: Integrate with a real email provider (e.g., SendGrid)
       // Example:
-      // const msg = { to, from: 'noreply@readypi.io', subject, text, html };
+      // const msg = { to, from: 'noreply@readypi.site', subject, text, html };
       // await sgMail.send(msg);
 
       if (process.env.NODE_ENV === 'development') {
@@ -39,7 +39,7 @@ class EmailService {
       subject: 'Welcome to ReadyPI! 🚀',
       html: `
         <h1>Welcome, ${fullName || 'Developer'}!</h1>
-        <p>Thank you for joining ReadyPI, Bangladesh's first AI API Gateway.</p>
+        <p>Thank you for joining ReadyPI, India's first AI API Gateway.</p>
         <p>We've added <strong>50 free credits</strong> to your account to get you started.</p>
         <p><a href="${process.env.DASHBOARD_URL}/dashboard">Go to Dashboard</a></p>
       `

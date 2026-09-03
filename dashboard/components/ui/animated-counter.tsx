@@ -106,7 +106,7 @@ export function AnimatedCurrency({
   return (
     <AnimatedCounter
       value={value}
-      prefix={showSymbol ? "৳" : ""}
+      prefix={showSymbol ? "₹" : ""}
       className={className}
     />
   );
