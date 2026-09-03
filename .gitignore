@@ -37,6 +37,8 @@ Thumbs.db
 dist/
 build/
 .next/
+dashboard/.next/
+**/.next/
 out/
 
 # Testing
