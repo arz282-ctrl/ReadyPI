@@ -42,8 +42,9 @@ process.env.CORS_ORIGIN = 'http://localhost:3000,http://localhost:3001';
 // Logging
 process.env.LOG_LEVEL = 'error';
 
-// Firebase mock
-process.env.FIREBASE_PROJECT_ID = 'readypi-test';
+// Supabase mock
+process.env.SUPABASE_URL = 'https://test.supabase.co';
+process.env.SUPABASE_ANON_KEY = 'test_supabase_anon_key';
 
 // Global test timeout
 jest.setTimeout(30000);

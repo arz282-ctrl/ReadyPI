@@ -102,11 +102,11 @@ export const authAPI = {
     api.post('/auth/logout'),
 
   /**
-   * Exchange a Firebase ID token for a ReadyPI backend JWT.
-   * This bridges Firebase Auth with our Postgres-backed user system.
+   * Exchange a Supabase Auth access token for a ReadyPI backend JWT.
+   * This bridges Supabase Auth with our Postgres-backed user system.
    */
-  firebaseExchange: (firebaseIdToken: string) =>
-    api.post<LoginResponse>('/auth/firebase-exchange', { idToken: firebaseIdToken }),
+  supabaseExchange: (supabaseAccessToken: string) =>
+    api.post<LoginResponse>('/auth/supabase-exchange', { access_token: supabaseAccessToken }),
 };
 
 // ─── Chat endpoints ───────────────────────────────────────────────────────────
@@ -124,6 +124,12 @@ export const creditsAPI = {
   stats: () => api.get('/credits/stats'),
   createPayment: (packageId: string, method: string) =>
     api.post('/payment/create', { package_id: packageId, payment_method: method }),
+  verifyRazorpay: (payload: {
+    transaction_id: string;
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) => api.post('/payment/razorpay/verify', payload),
 };
 
 // ─── API Keys endpoints ──────────────────────────────────────────────────────

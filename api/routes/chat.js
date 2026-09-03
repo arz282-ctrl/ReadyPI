@@ -193,7 +193,7 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
           message: `Model '${model}' is not available on the free plan. Upgrade to Starter (৳499/mo) to access all models.`,
           type: 'insufficient_quota',
           code: 'plan_upgrade_required',
-          upgrade_url: 'https://readypi.io/pricing'
+          upgrade_url: 'https://readypi.site/pricing'
         }
       });
     }
@@ -214,7 +214,7 @@ router.post('/completions', verifyAPIKey, apiKeyRateLimiter, async (req, res) =>
             code: 'insufficient_credits',
             credits_required: estimatedCredits,
             credits_available: req.apiKey.creditBalance,
-            top_up_url: 'https://readypi.io/dashboard/credits'
+            top_up_url: 'https://readypi.site/dashboard/credits'
           }
         });
       }

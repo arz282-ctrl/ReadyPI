@@ -1,19 +1,18 @@
 'use client';
 
 /**
- * AuthProvider — Global Authentication Context
+ * AuthProvider — Global Authentication Context (Supabase Auth edition)
  *
- * Bridges Firebase Auth (frontend identity) with the ReadyPI backend (Postgres user record).
+ * Bridges Supabase Auth (frontend identity) with the ReadyPI backend (Postgres user record).
  *
  * Flow:
- * 1. User signs in via Firebase Auth (email/password OR OAuth)
- * 2. Firebase returns an ID token
- * 3. We POST that token to our backend /auth/firebase-exchange
- * 4. Backend verifies via Firebase Admin SDK, upserts the user in Postgres, returns a ReadyPI JWT
+ * 1. User signs in via Supabase Auth (email/password OR OAuth)
+ * 2. Supabase returns a session with an access token (JWT)
+ * 3. We POST that token to our backend /auth/supabase-exchange
+ * 4. Backend verifies it against Supabase, upserts the user in Postgres, returns a ReadyPI JWT
  * 5. We store that JWT in localStorage for all subsequent API calls
  *
- * This allows us to use Firebase Auth's Google/GitHub OAuth while keeping our
- * own user table, credits, and API key system intact.
+ * This keeps our own user table, credits, and API key system intact.
  */
 
 import {
@@ -24,28 +23,15 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import {
-  auth,
-  googleProvider,
-  githubProvider,
-  facebookProvider,
-  appleProvider,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  isFirebaseConfigured,
-  type User as FirebaseUser,
-} from '@/lib/firebase';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { authAPI, type UserProfile } from '@/lib/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface AuthState {
-  firebaseUser: FirebaseUser | null;
+  supabaseUser: SupabaseUser | null;
+  firebaseUser: SupabaseUser | null; // legacy alias for backward compatibility
   user: UserProfile | null;
   token: string | null;
   loading: boolean;
@@ -68,10 +54,27 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function persistSession(token: string, user: unknown) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('readypi_token', token);
+  localStorage.setItem('readypi_user', JSON.stringify(user));
+  document.cookie = `readypi_session=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+}
+
+function clearSession() {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('readypi_token');
+  localStorage.removeItem('readypi_user');
+  document.cookie = 'readypi_session=; path=/; max-age=0';
+}
+
 // ─── Provider ────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
+    supabaseUser: null,
     firebaseUser: null,
     user: null,
     token: null,
@@ -79,31 +82,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error: null,
   });
 
-  // Utility to merge state
   const patch = (partial: Partial<AuthState>) =>
     setState((prev) => ({ ...prev, ...partial }));
 
   /**
-   * Exchange Firebase ID token with our backend.
+   * Exchange a Supabase session access token with our backend.
    * On success, stores the ReadyPI JWT and user profile.
    */
-  const exchangeToken = useCallback(async (fbUser: FirebaseUser) => {
+  const exchangeToken = useCallback(async (session: Session) => {
     try {
-      const idToken = await fbUser.getIdToken(true);
-      const { data } = await authAPI.firebaseExchange(idToken);
+      const { data } = await authAPI.supabaseExchange(session.access_token);
+      persistSession(data.token, data.user);
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('readypi_token', data.token);
-        localStorage.setItem('readypi_user', JSON.stringify(data.user));
-        // Set cookie for middleware route protection
-        document.cookie = `readypi_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-      }
-
-      // Fetch full profile (includes credits, API key count, etc.)
       const { data: profile } = await authAPI.me();
 
       patch({
-        firebaseUser: fbUser,
+        supabaseUser: session.user,
+        firebaseUser: session.user,
         user: profile,
         token: data.token,
         loading: false,
@@ -117,27 +112,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
-   * Direct login (bypasses Firebase — uses our existing email/password endpoint).
-   * This is the fallback if Firebase Auth is not configured yet.
+   * Direct login (bypasses Supabase — uses our existing email/password endpoint).
+   * Fallback if Supabase Auth is unreachable.
    */
   const loginDirect = useCallback(async (email: string, password: string) => {
     const { data } = await authAPI.login(email, password);
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('readypi_token', data.token);
-      localStorage.setItem('readypi_user', JSON.stringify(data.user));
-      // Set cookie for middleware route protection
-      document.cookie = `readypi_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-    }
-
+    persistSession(data.token, data.user);
     const { data: profile } = await authAPI.me();
-
-    patch({
-      user: profile,
-      token: data.token,
-      loading: false,
-      error: null,
-    });
+    patch({ user: profile, token: data.token, loading: false, error: null });
   }, []);
 
   // ─── Auth Methods ─────────────────────────────────────────────────────────
@@ -145,199 +127,141 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginWithEmail = useCallback(async (email: string, password: string) => {
     patch({ loading: true, error: null });
     try {
-      // Try Firebase Auth first; fall back to direct login if Firebase isn't configured
-      if (isFirebaseConfigured) {
-        const credential = await signInWithEmailAndPassword(auth, email, password);
-        await exchangeToken(credential.user);
-      } else {
-        await loginDirect(email, password);
-      }
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      await exchangeToken(data.session);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Login failed';
-      // If Firebase auth fails, try direct backend login as fallback
+      // Fall back to direct backend login (covers legacy users created pre-Supabase)
       try {
         await loginDirect(email, password);
       } catch (directErr: unknown) {
-        const directMessage = directErr instanceof Error ? directErr.message : 'Login failed';
-        patch({ loading: false, error: directMessage });
+        const directMessage =
+          directErr instanceof Error ? directErr.message : 'Login failed';
+        const supaMessage = err instanceof Error ? err.message : '';
+        patch({
+          loading: false,
+          error: supaMessage.includes('Invalid login credentials')
+            ? 'Invalid email or password'
+            : directMessage,
+        });
         throw directErr;
       }
     }
   }, [exchangeToken, loginDirect]);
 
-  const signupWithEmail = useCallback(async (email: string, password: string, fullName?: string) => {
-    patch({ loading: true, error: null });
-    try {
-      if (isFirebaseConfigured) {
-        const credential = await createUserWithEmailAndPassword(auth, email, password);
-        await exchangeToken(credential.user);
-      } else {
-        // Direct signup via our backend
-        const { data } = await authAPI.signup(email, password, fullName);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('readypi_token', data.token);
-          localStorage.setItem('readypi_user', JSON.stringify(data.user));
-          document.cookie = `readypi_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-        }
-        const { data: profile } = await authAPI.me();
-        patch({ user: profile, token: data.token, loading: false, error: null });
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Signup failed';
-      patch({ loading: false, error: message });
-      throw err;
-    }
-  }, [exchangeToken]);
+  const signupWithEmail = useCallback(
+    async (email: string, password: string, fullName?: string) => {
+      patch({ loading: true, error: null });
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: fullName || null } },
+        });
+        if (error) throw error;
 
-  const loginWithGoogle = useCallback(async () => {
-    if (!isFirebaseConfigured) {
-      const message = 'Google OAuth is not configured. Please use email/password to sign in.';
-      patch({ loading: false, error: message });
-      throw new Error(message);
-    }
-    patch({ loading: true, error: null });
-    console.log('[OAuth] Attempting Google login...');
-    try {
-      const credential = await signInWithPopup(auth, googleProvider);
-      console.log('[OAuth] Google credential received:', credential.user?.uid);
-      await exchangeToken(credential.user);
-      console.log('[OAuth] Google login successful');
-    } catch (err: unknown) {
-      let message = 'Google login failed';
-      let errorCode = '';
-      if (err instanceof Error) {
-        errorCode = (err as any).code || '';
-        if (errorCode.includes('popup-closed') || err.message.includes('popup-closed')) {
-          message = 'Google sign-in was cancelled';
-        } else if (errorCode.includes('unauthorized-domain')) {
-          message = 'This domain is not authorized for OAuth. Please add it to Firebase Console > Authentication > Settings > Authorized domains.';
-        } else if (errorCode.includes('invalid-oauth')) {
-          message = 'Google OAuth is not properly configured in Firebase Console.';
-        } else if (err.message.includes('network')) {
-          message = 'Network error. Please check your connection.';
+        if (data.session) {
+          // Email confirmation disabled — session available immediately
+          await exchangeToken(data.session);
         } else {
-          message = err.message || errorCode;
+          // Email confirmation required
+          patch({
+            loading: false,
+            error: null,
+          });
+          throw new Error(
+            'CONFIRM_EMAIL:Check your inbox — we sent you a confirmation link. Sign in after confirming.'
+          );
         }
-      }
-      console.error('[OAuth] Google login error:', { code: errorCode, message: err instanceof Error ? err.message : String(err) });
-      patch({ loading: false, error: message });
-      throw err;
-    }
-  }, [exchangeToken]);
-
-  const loginWithGithub = useCallback(async () => {
-    if (!isFirebaseConfigured) {
-      const message = 'GitHub OAuth is not configured. Please use email/password to sign in.';
-      patch({ loading: false, error: message });
-      throw new Error(message);
-    }
-    patch({ loading: true, error: null });
-    try {
-      const credential = await signInWithPopup(auth, githubProvider);
-      await exchangeToken(credential.user);
-    } catch (err: unknown) {
-      let message = 'GitHub login failed';
-      let errorCode = '';
-      if (err instanceof Error) {
-        errorCode = (err as any).code || '';
-        if (errorCode.includes('popup-closed') || err.message.includes('popup-closed')) {
-          message = 'GitHub sign-in was cancelled';
-        } else if (errorCode.includes('unauthorized-domain')) {
-          message = 'This domain is not authorized for OAuth. Contact support to add it to Firebase authorized domains.';
-        } else if (err.message.includes('redirect_uri_mismatch')) {
-          message = 'GitHub OAuth redirect not configured. Configure callback URL: https://readypi-core.firebaseapp.com/__/auth/handler';
-        } else {
-          message = err.message || errorCode;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Signup failed';
+        if (!message.startsWith('CONFIRM_EMAIL:')) {
+          patch({ loading: false, error: message });
         }
+        throw err;
       }
-      console.error('[OAuth] GitHub login error:', { code: errorCode, message: err instanceof Error ? err.message : String(err) });
-      patch({ loading: false, error: message });
-      throw err;
-    }
-  }, [exchangeToken]);
+    },
+    [exchangeToken]
+  );
 
-  const loginWithFacebook = useCallback(async () => {
-    if (!isFirebaseConfigured) {
-      const message = 'Facebook OAuth is not configured. Please use email/password to sign in.';
-      patch({ loading: false, error: message });
-      throw new Error(message);
-    }
-    patch({ loading: true, error: null });
-    try {
-      const credential = await signInWithPopup(auth, facebookProvider);
-      await exchangeToken(credential.user);
-    } catch (err: unknown) {
-      let message = 'Facebook login failed';
-      if (err instanceof Error) {
-        if (err.message.includes('popup-closed')) {
-          message = 'Facebook sign-in was cancelled';
-        } else {
-          message = err.message;
+  /** Shared OAuth redirect flow */
+  const oauthLogin = useCallback(
+    async (provider: 'google' | 'github' | 'facebook' | 'apple') => {
+      patch({ loading: true, error: null });
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo:
+              typeof window !== 'undefined'
+                ? `${window.location.origin}/dashboard`
+                : undefined,
+          },
+        });
+        if (error) throw error;
+        // Browser will redirect; onAuthStateChange handles the return leg.
+      } catch (err: unknown) {
+        let message = `${provider} login failed`;
+        if (err instanceof Error) {
+          message = err.message.includes('provider is not enabled')
+            ? `${provider} sign-in is not enabled yet. Enable it in Supabase Dashboard → Authentication → Providers.`
+            : err.message;
         }
+        patch({ loading: false, error: message });
+        throw err;
       }
-      patch({ loading: false, error: message });
-      throw err;
-    }
-  }, [exchangeToken]);
+    },
+    []
+  );
 
-  const loginWithApple = useCallback(async () => {
-    if (!isFirebaseConfigured) {
-      const message = 'Apple OAuth is not configured. Please use email/password to sign in.';
-      patch({ loading: false, error: message });
-      throw new Error(message);
-    }
-    patch({ loading: true, error: null });
-    try {
-      const credential = await signInWithPopup(auth, appleProvider);
-      await exchangeToken(credential.user);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Apple login failed';
-      patch({ loading: false, error: message });
-      throw err;
-    }
-  }, [exchangeToken]);
+  const loginWithGoogle = useCallback(() => oauthLogin('google'), [oauthLogin]);
+  const loginWithGithub = useCallback(() => oauthLogin('github'), [oauthLogin]);
+  const loginWithFacebook = useCallback(() => oauthLogin('facebook'), [oauthLogin]);
+  const loginWithApple = useCallback(() => oauthLogin('apple'), [oauthLogin]);
 
-  const sendPhoneCode = useCallback(async (phoneNumber: string, containerId: string) => {
+  /** Phone OTP via Supabase (requires SMS provider configured in Supabase dashboard) */
+  const sendPhoneCode = useCallback(async (phoneNumber: string, _containerId: string) => {
     patch({ error: null });
     try {
-      const appVerifier = new RecaptchaVerifier(auth, containerId, {
-        size: 'invisible',
-      });
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-      return confirmationResult;
+      const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber });
+      if (error) throw error;
+      // Return a shim matching the old confirmationResult API
+      return { phone: phoneNumber };
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to send phone verification code';
+      const message =
+        err instanceof Error ? err.message : 'Failed to send phone verification code';
       patch({ error: message });
       throw err;
     }
   }, []);
 
-  const verifyPhoneCode = useCallback(async (confirmationResult: any, code: string) => {
-    patch({ loading: true, error: null });
-    try {
-      const credential = await confirmationResult.confirm(code);
-      await exchangeToken(credential.user);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Invalid verification code';
-      patch({ loading: false, error: message });
-      throw err;
-    }
-  }, [exchangeToken]);
+  const verifyPhoneCode = useCallback(
+    async (confirmationResult: any, code: string) => {
+      patch({ loading: true, error: null });
+      try {
+        const { data, error } = await supabase.auth.verifyOtp({
+          phone: confirmationResult.phone,
+          token: code,
+          type: 'sms',
+        });
+        if (error) throw error;
+        if (data.session) await exchangeToken(data.session);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Invalid verification code';
+        patch({ loading: false, error: message });
+        throw err;
+      }
+    },
+    [exchangeToken]
+  );
 
   const logout = useCallback(async () => {
     try {
       await authAPI.logout().catch(() => {});
-      if (isFirebaseConfigured) {
-        await firebaseSignOut(auth).catch(() => {});
-      }
+      await supabase.auth.signOut().catch(() => {});
     } finally {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('readypi_token');
-        localStorage.removeItem('readypi_user');
-        // Clear session cookie
-        document.cookie = 'readypi_session=; path=/; max-age=0';
-      }
-      patch({ firebaseUser: null, user: null, token: null, loading: false, error: null });
+      clearSession();
+      patch({ supabaseUser: null, firebaseUser: null, user: null, token: null, loading: false, error: null });
     }
   }, []);
 
@@ -352,10 +276,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // ─── On mount: restore session from localStorage ──────────────────────────
+  // ─── On mount: restore session ────────────────────────────────────────────
 
   useEffect(() => {
-    // Check localStorage first for fast hydration
+    // 1. Fast hydration from localStorage (ReadyPI JWT)
     if (typeof window !== 'undefined') {
       const savedToken = localStorage.getItem('readypi_token');
       const savedUser = localStorage.getItem('readypi_user');
@@ -364,50 +288,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const parsedUser = JSON.parse(savedUser);
           patch({ token: savedToken, user: parsedUser as UserProfile, loading: false });
-
-          // Ensure the cookie is synced (it may have expired while localStorage persisted)
-          // This prevents the middleware from redirecting when auth context thinks user is logged in
           document.cookie = `readypi_session=${savedToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
 
-          // Refresh profile in background for freshness
-          authAPI.me()
+          authAPI
+            .me()
             .then(({ data }) => patch({ user: data }))
             .catch((err: any) => {
-              // Token expired/invalid — clear everything including cookie ONLY if it is an auth error
               if (err?.response?.status === 401 || err?.response?.status === 403) {
-                localStorage.removeItem('readypi_token');
-                localStorage.removeItem('readypi_user');
-                document.cookie = 'readypi_session=; path=/; max-age=0';
+                clearSession();
                 patch({ user: null, token: null });
               } else {
-                console.warn('Background profile refresh failed due to network/server issue:', err);
+                console.warn('Background profile refresh failed (network/server):', err);
               }
             });
-          return;
         } catch {
           localStorage.removeItem('readypi_user');
         }
+      } else {
+        patch({ loading: false });
       }
     }
 
-    // If Firebase is configured, listen for auth state changes
-    if (isFirebaseConfigured) {
-      const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-        if (fbUser) {
+    // 2. Listen for Supabase auth events (OAuth redirects, token refresh, sign-out)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        // Only exchange if we don't already hold a ReadyPI token
+        const existing =
+          typeof window !== 'undefined' ? localStorage.getItem('readypi_token') : null;
+        if (!existing) {
           try {
-            await exchangeToken(fbUser);
+            await exchangeToken(session);
           } catch {
             patch({ loading: false });
           }
         } else {
-          patch({ firebaseUser: null, loading: false });
+          patch({ supabaseUser: session.user, firebaseUser: session.user, loading: false });
         }
-      });
-      return () => unsubscribe();
-    }
+      } else if (event === 'SIGNED_OUT') {
+        patch({ supabaseUser: null, firebaseUser: null, loading: false });
+      }
+    });
 
-    // No Firebase, no saved token
-    patch({ loading: false });
+    return () => subscription.unsubscribe();
   }, [exchangeToken]);
 
   return (

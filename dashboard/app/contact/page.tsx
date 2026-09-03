@@ -12,31 +12,31 @@ export default function ContactPage() {
         {
           heading: 'General questions',
           body: (
-            <p><a href="mailto:hello@readypi.io" className="text-[#ff6b4a] underline">hello@readypi.io</a> — partnerships, press, hiring, anything else.</p>
+            <p><a href="mailto:hello@readypi.site" className="text-[#ff6b4a] underline">hello@readypi.site</a> — partnerships, press, hiring, anything else.</p>
           ),
         },
         {
           heading: 'Technical support',
           body: (
-            <p><a href="mailto:support@readypi.io" className="text-[#ff6b4a] underline">support@readypi.io</a> — broken integrations, billing questions, model availability. Include your account email and a request ID if you have one.</p>
+            <p><a href="mailto:support@readypi.site" className="text-[#ff6b4a] underline">support@readypi.site</a> — broken integrations, billing questions, model availability. Include your account email and a request ID if you have one.</p>
           ),
         },
         {
           heading: 'Security disclosures',
           body: (
-            <p><a href="mailto:security@readypi.io" className="text-[#ff6b4a] underline">security@readypi.io</a> — vulnerabilities, abuse reports. Please don't file public issues for security bugs.</p>
+            <p><a href="mailto:security@readypi.site" className="text-[#ff6b4a] underline">security@readypi.site</a> — vulnerabilities, abuse reports. Please don't file public issues for security bugs.</p>
           ),
         },
         {
           heading: 'Legal & privacy',
           body: (
-            <p><a href="mailto:legal@readypi.io" className="text-[#ff6b4a] underline">legal@readypi.io</a> · <a href="mailto:privacy@readypi.io" className="text-[#ff6b4a] underline">privacy@readypi.io</a> — DSAR requests, account deletion, contracts.</p>
+            <p><a href="mailto:legal@readypi.site" className="text-[#ff6b4a] underline">legal@readypi.site</a> · <a href="mailto:privacy@readypi.site" className="text-[#ff6b4a] underline">privacy@readypi.site</a> — DSAR requests, account deletion, contracts.</p>
           ),
         },
         {
           heading: 'Office',
           body: (
-            <p>Rareware Studio · Sylhet, Bangladesh 🇧🇩</p>
+            <p>Rareware Studio · Mumbai, India 🇮🇳</p>
           ),
         },
       ]}

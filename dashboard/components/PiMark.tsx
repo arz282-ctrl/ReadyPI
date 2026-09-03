@@ -11,7 +11,7 @@
  * This component creates an impressive 3D LEGO-style π symbol with:
  * - Multi-layer shadow for 3D depth
  * - Glowing orbital particles
- * - Floating code labels (API, bKash, 50+, etc.)
+ * - Floating code labels (API, UPI, 50+, etc.)
  * - LED-style studs on top
  * - Smooth floating animation
  * - Mouse-reactive subtle tilt
@@ -126,10 +126,10 @@ export default function PiMark({
   const labels = [
     { text: "API", delay: 0, top: "8%", left: "0%" },
     { text: "GPT-4o", delay: 0.5, top: "18%", right: "5%" },
-    { text: "৳499", delay: 1, bottom: "20%", left: "2%" },
-    { text: "bKash", delay: 1.5, bottom: "12%", right: "8%" },
-    { text: "150+", delay: 2, top: "35%", left: "-2%" },
-    { text: "BD", delay: 2.5, top: "55%", right: "0%" },
+    { text: "₹499", delay: 1, bottom: "20%", left: "2%" },
+    { text: "UPI", delay: 1.5, bottom: "12%", right: "8%" },
+    { text: "Sarvam AI", delay: 2, top: "35%", left: "-2%" },
+    { text: "IND", delay: 2.5, top: "55%", right: "0%" },
   ];
 
   // Orbiting particles

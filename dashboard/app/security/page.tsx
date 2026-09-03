@@ -15,7 +15,7 @@ export default function SecurityPage() {
           body: (
             <>
               <p>Keys are generated server-side using a cryptographically secure random source, prefixed <code className="text-[#ff6b4a] font-mono text-sm">rpi_live_</code> for production and <code className="text-[#ff6b4a] font-mono text-sm">rpi_test_</code> for sandbox. The plaintext is shown to you exactly once at creation; the database stores only a bcrypt hash with cost factor 12.</p>
-              <p>Each key is scoped to a single workspace and can carry an optional monthly BDT spend cap. Revocation is instant — within milliseconds the key is invalidated across every gateway node.</p>
+              <p>Each key is scoped to a single workspace and can carry an optional monthly INR (₹) spend cap. Revocation is instant — within milliseconds the key is invalidated across every gateway node.</p>
             </>
           ),
         },
@@ -39,8 +39,8 @@ export default function SecurityPage() {
           heading: 'Authentication',
           body: (
             <>
-              <p>End-user authentication supports email/passphrase (bcrypt, cost 12) and OAuth via Google and GitHub (Firebase Auth bridge). JWTs are short-lived; refresh tokens are rotated on every use.</p>
-              <p>The OAuth bridge exchanges a Firebase ID token for a ReadyPi session token in a single signed call — passwords from your Google or GitHub account never reach our servers.</p>
+              <p>End-user authentication supports email/passphrase (bcrypt, cost 12) and OAuth via Google, GitHub, and Apple (Supabase Auth bridge). JWTs are short-lived; refresh tokens are rotated on every use.</p>
+              <p>The OAuth bridge exchanges a Supabase token for a ReadyPi session token in a single signed call — passwords from your Google, GitHub, or Apple account never reach our servers.</p>
             </>
           ),
         },
@@ -56,7 +56,7 @@ export default function SecurityPage() {
           heading: 'Disclosure',
           body: (
             <>
-              <p>If you believe you have found a vulnerability, please <strong className="text-white">do not file a public issue</strong>. Email <a href="mailto:security@readypi.io" className="text-[#ff6b4a] underline">security@readypi.io</a> with reproduction steps. We aim to acknowledge within 24 hours and to ship a fix or mitigation within 7 days for high-severity issues.</p>
+              <p>If you believe you have found a vulnerability, please <strong className="text-white">do not file a public issue</strong>. Email <a href="mailto:security@readypi.site" className="text-[#ff6b4a] underline">security@readypi.site</a> with reproduction steps. We aim to acknowledge within 24 hours and to ship a fix or mitigation within 7 days for high-severity issues.</p>
               <p>We do not currently offer a paid bug bounty, but we credit reporters publicly (with permission) and offer service credits for material findings.</p>
             </>
           ),

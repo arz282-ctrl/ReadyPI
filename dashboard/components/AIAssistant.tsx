@@ -115,8 +115,8 @@ function renderInline(text: string, key: string): React.ReactNode {
 const SUGGESTED_PROMPTS = [
   'How do I get my first API key?',
   'Show me a Python quickstart example',
-  'What free models are available?',
-  'How do I top up with bKash?',
+  'What free & Indic models are available?',
+  'How do I top up with UPI or Razorpay?',
   'What\'s the difference between plans?',
   'How do I switch models in my code?',
 ]
@@ -262,7 +262,7 @@ export default function AIAssistant() {
           if (last?.streaming) {
             updated[updated.length - 1] = {
               role: 'assistant',
-              content: `⚠️ ${msg}\n\nPlease try again or contact support@readypi.io`,
+              content: `⚠️ ${msg}\n\nPlease try again or contact support@readypi.site`,
               streaming: false
             }
           }

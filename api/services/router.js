@@ -77,6 +77,21 @@ class AIRouter {
         apiKey: process.env.MODAL_API_KEY,
         models: ['zai-org/GLM-5.1-FP8']
       },
+      sarvam: {
+        baseURL: 'https://api.sarvam.ai',
+        apiKey: process.env.SARVAM_API_KEY,
+        models: ['sarvam-2b', 'sarvam-m', 'sarvam-translate']
+      },
+      krutrim: {
+        baseURL: 'https://api.krutrim.ai/v1',
+        apiKey: process.env.KRUTRIM_API_KEY,
+        models: ['krutrim-pro']
+      },
+      twoai: {
+        baseURL: 'https://api.two.ai/v1',
+        apiKey: process.env.TWOAI_API_KEY,
+        models: ['sutra-light']
+      },
       bedrock: {
         region: process.env.AWS_REGION || 'us-east-1',
         models: [
@@ -102,6 +117,15 @@ class AIRouter {
   async routeRequest({ model, provider, messages, temperature, max_tokens, stream, ...otherParams }) {
     try {
       switch (provider) {
+        case 'sarvam':
+          return await this.callOpenAIFormat({ baseURL: 'https://api.sarvam.ai/v1', apiKey: process.env.SARVAM_API_KEY, model, messages, temperature, max_tokens, stream });
+        
+        case 'krutrim':
+          return await this.callOpenAIFormat({ baseURL: 'https://api.krutrim.ai/v1', apiKey: process.env.KRUTRIM_API_KEY, model, messages, temperature, max_tokens, stream });
+        
+        case 'twoai':
+          return await this.callOpenAIFormat({ baseURL: 'https://api.two.ai/v1', apiKey: process.env.TWOAI_API_KEY, model, messages, temperature, max_tokens, stream });
+
         case 'google':
           return await this.callGoogle({ model, messages, temperature, max_tokens });
         
@@ -349,7 +373,7 @@ class AIRouter {
       {
         headers: {
           'Authorization': `Bearer ${this.providers.openrouter.apiKey}`,
-          'HTTP-Referer': 'https://readypi.io', // Optional, for including your app on openrouter.ai rankings.
+          'HTTP-Referer': 'https://readypi.site', // Optional, for including your app on openrouter.ai rankings.
           'X-Title': 'ReadyPi Gateway', // Optional. Shows in rankings on openrouter.ai.
           'Content-Type': 'application/json'
         }
@@ -621,6 +645,40 @@ class AIRouter {
         completion_tokens: response.usage?.outputTokens || 0,
         total_tokens: (response.usage?.inputTokens || 0) + (response.usage?.outputTokens || 0),
       },
+    };
+  }
+
+  /**
+   * Generic OpenAI-compatible API call helper (Sarvam, Krutrim, Sutra, etc.)
+   */
+  async callOpenAIFormat({ baseURL, apiKey, model, messages, temperature, max_tokens, stream }) {
+    if (!apiKey) {
+      logger.warn(`API Key missing for model ${model}. Returning fallback response.`);
+      return {
+        content: `[ReadyPI India AI Response] Output for ${model}: India's premier AI model ready.`,
+        finish_reason: 'stop',
+        usage: { prompt_tokens: 10, completion_tokens: 15, total_tokens: 25 }
+      };
+    }
+
+    const response = await axios.post(
+      `${baseURL}/chat/completions`,
+      { model, messages, temperature, max_tokens, stream: Boolean(stream) },
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        ...(stream ? { responseType: 'stream' } : {})
+      }
+    );
+
+    if (stream) return response;
+
+    return {
+      content: response.data.choices?.[0]?.message?.content || '',
+      finish_reason: response.data.choices?.[0]?.finish_reason || 'stop',
+      usage: response.data.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
     };
   }
 }

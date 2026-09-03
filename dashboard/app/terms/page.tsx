@@ -14,7 +14,7 @@ export default function TermsPage() {
           heading: '1. The Service',
           body: (
             <>
-              <p>ReadyPi is an API gateway operated by Rareware Studio (Sylhet, Bangladesh) that proxies requests to third-party AI model providers (OpenAI, Anthropic, Google, Groq, Meta, DeepSeek, Mistral, and others). You bring a ReadyPi API key; we route the request, bill credits in BDT, and return the provider's response.</p>
+              <p>ReadyPi is an AI API gateway that proxies requests to third-party AI model providers (Sarvam AI, Krutrim, OpenAI, Anthropic, Google, Groq, Meta, DeepSeek, Mistral, and others). You bring a ReadyPi API key; we route the request, bill credits in Indian Rupees (INR / ₹), and return the provider's response.</p>
               <p>We do not own or operate the underlying models. Output quality, availability, and content policies are governed by the upstream provider for the model you select.</p>
             </>
           ),
@@ -32,7 +32,7 @@ export default function TermsPage() {
           heading: '3. Acceptable Use',
           body: (
             <>
-              <p>You may not use ReadyPi to generate content that is illegal under Bangladeshi or applicable jurisdictional law, that targets or harasses individuals, that infringes copyright, or that attempts to defeat the safety guardrails of upstream providers. We honor the acceptable-use policies of every provider we integrate with — abuse on one provider can suspend your access to all of them.</p>
+              <p>You may not use ReadyPi to generate content that is illegal under Indian or applicable jurisdictional law, that targets or harasses individuals, that infringes copyright, or that attempts to defeat the safety guardrails of upstream providers. We honor the acceptable-use policies of every provider we integrate with — abuse on one provider can suspend your access to all of them.</p>
               <p>Automated abuse, scraping that violates a provider's terms, and reselling raw API access without an integration are prohibited.</p>
             </>
           ),
@@ -41,7 +41,7 @@ export default function TermsPage() {
           heading: '4. Billing & Credits',
           body: (
             <>
-              <p>ReadyPi runs on a prepaid credit model denominated in Bangladeshi Taka (BDT). You top up credits via bKash, Nagad, Rocket, card, or USDT, and each request deducts credits at the published BDT-per-million-token rate for the model used.</p>
+              <p>ReadyPi runs on a prepaid credit model denominated in Indian Rupees (INR / ₹). You top up credits via PhonePe, Google Pay, Paytm, UPI, Razorpay, NetBanking, Cards, or USDT, and each request deducts credits at the published INR-per-million-token rate for the model used.</p>
               <p>Pricing per model is shown on the Models page and may change with 30 days' notice. Credits do not expire and are not refundable in cash, but unused balances can be applied to any future request on any model.</p>
             </>
           ),
@@ -82,7 +82,7 @@ export default function TermsPage() {
         {
           heading: '9. Contact',
           body: (
-            <p>Questions about these terms: <a href="mailto:legal@readypi.io" className="text-[#ff6b4a] underline">legal@readypi.io</a>.</p>
+            <p>Questions about these terms: <a href="mailto:legal@readypi.site" className="text-[#ff6b4a] underline">legal@readypi.site</a>.</p>
           ),
         },
       ]}

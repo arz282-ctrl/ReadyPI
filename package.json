@@ -1,14 +1,15 @@
 {
-  "name": "readypi-api",
+  "name": "readypi-root",
   "version": "1.0.0",
-  "description": "ReadyPi AI API Aggregation Platform - Bangladesh's first AI gateway with bKash/Nagad payment",
+  "description": "ReadyPi AI API Aggregation Platform - Unified AI Gateway & Developer Dashboard",
   "main": "api/server.js",
   "scripts": {
-    "dev": "nodemon api/server.js",
+    "dev": "bash start-local.sh",
+    "dev:api": "node api/server.js",
+    "dev:dashboard": "npm --prefix dashboard run dev",
+    "build:dashboard": "npm --prefix dashboard run build",
     "start": "node api/server.js",
-    "test": "jest --coverage",
-    "db:migrate": "psql readypi < database/schema.sql",
-    "db:reset": "psql -c 'DROP DATABASE IF EXISTS readypi;' && psql -c 'CREATE DATABASE readypi;' && npm run db:migrate"
+    "test": "npm --prefix api run test"
   },
   "keywords": [
     "ai",
@@ -16,14 +17,15 @@
     "gateway",
     "openai",
     "anthropic",
-    "bangladesh",
-    "bkash",
-    "nagad"
+    "gemini",
+    "deepseek",
+    "supabase",
+    "vercel"
   ],
   "author": "Rareware Studio",
   "license": "PROPRIETARY",
   "dependencies": {
-    "@dataconnect/generated": "file:src/dataconnect-generated",
+    "@google/genai": "^1.52.0",
     "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
@@ -34,6 +36,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
+    "stripe": "^22.1.0",
     "tiktoken": "^1.0.10",
     "uuid": "^9.0.1",
     "winston": "^3.11.0"

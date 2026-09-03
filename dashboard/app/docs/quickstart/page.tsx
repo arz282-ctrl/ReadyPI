@@ -5,13 +5,13 @@ export const metadata = { title: 'Quickstart — ReadyPi Docs' };
 const pyCode = `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.readypi.io/v1",
+    base_url="https://api.readypi.online/v1",
     api_key="rpi_live_xxxxxxxxxxxxxxxxxxxxxxxx",
 )
 
 resp = client.chat.completions.create(
     model="anthropic/claude-3.5-sonnet",
-    messages=[{"role": "user", "content": "Write a haiku about Sylhet."}],
+    messages=[{"role": "user", "content": "Write a haiku about Mumbai."}],
 )
 
 print(resp.choices[0].message.content)`;
@@ -19,7 +19,7 @@ print(resp.choices[0].message.content)`;
 const nodeCode = `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.readypi.io/v1",
+  baseURL: "https://api.readypi.online/v1",
   apiKey: process.env.READYPI_KEY, // rpi_live_...
 });
 
@@ -30,7 +30,7 @@ const resp = await client.chat.completions.create({
 
 console.log(resp.choices[0].message.content);`;
 
-const curlCode = `curl https://api.readypi.io/v1/chat/completions \\
+const curlCode = `curl https://api.readypi.online/v1/chat/completions \\
   -H "Authorization: Bearer $READYPI_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -70,7 +70,7 @@ export default function QuickstartPage() {
           heading: '2. Point your client at ReadyPi',
           body: (
             <>
-              <p>Set the base URL to <code className="text-[#ff6b4a] font-mono text-sm">https://api.readypi.io/v1</code> and use your <code className="text-[#ff6b4a] font-mono text-sm">rpi_live_...</code> key as the bearer token. Any OpenAI-SDK-compatible client works:</p>
+              <p>Set the base URL to <code className="text-[#ff6b4a] font-mono text-sm">https://api.readypi.online/v1</code> and use your <code className="text-[#ff6b4a] font-mono text-sm">rpi_live_...</code> key as the bearer token. Any OpenAI-SDK-compatible client works:</p>
               <CodeBlock label="Python" code={pyCode} />
               <CodeBlock label="Node.js" code={nodeCode} />
               <CodeBlock label="cURL" code={curlCode} />
@@ -88,15 +88,15 @@ export default function QuickstartPage() {
                 <li><code className="text-[#ff6b4a] font-mono text-sm">anthropic/claude-3.5-sonnet</code> — best reasoning and coding.</li>
                 <li><code className="text-[#ff6b4a] font-mono text-sm">openai/gpt-4o-mini</code> — best price-to-quality on the OpenAI family.</li>
               </ul>
-              <p>Full catalog with BDT prices: <a href="/models" className="text-[#ff6b4a] underline">/models</a>.</p>
+              <p>Full catalog with INR (₹) rates: <a href="/models" className="text-[#ff6b4a] underline">/models</a>.</p>
             </>
           ),
         },
         {
-          heading: '4. Top up in BDT',
+          heading: '4. Top up in INR (₹)',
           body: (
             <>
-              <p>Add credits via bKash, Nagad, Rocket, card, or USDT from the Billing page. Credits never expire and apply to any model.</p>
+              <p>Add credits via PhonePe, Google Pay, Paytm, UPI, Razorpay, NetBanking, cards, or USDT from the Billing page. Credits never expire and apply to any model.</p>
             </>
           ),
         },

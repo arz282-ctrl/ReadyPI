@@ -142,7 +142,7 @@ export default function StatsCards({ totalRequests, totalTokens, avgLatency, tot
       />
       <StatCard
         label="Total Cost"
-        value={`৳${totalCostBdt.toFixed(2)}`}
+        value={`₹${totalCostBdt.toFixed(2)}`}
         subValue="Last 30 days"
         icon={<Zap size={16} />}
         sparkData={creditSpark}
